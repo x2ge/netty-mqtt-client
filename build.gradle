@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'com.wge.netty.mqtt'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven {
+        allowInsecureProtocol = true
+        url "http://192.168.46.167:9191/repository/maven-public/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.netty:netty-all:4.1.68.Final'
+}
+
+test {
+    useJUnitPlatform()
+}
