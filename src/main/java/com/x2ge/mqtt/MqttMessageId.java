@@ -1,4 +1,4 @@
-package com.wge.netty.mqtt;
+package com.x2ge.mqtt;
 
 import java.util.Hashtable;
 

@@ -1,6 +1,6 @@
-package com.wge.netty.mqtt;
+package com.x2ge.mqtt;
 
-import com.wge.netty.mqtt.utils.StringUtils;
+import com.x2ge.mqtt.utils.StringUtils;
 import io.netty.handler.codec.mqtt.MqttVersion;
 
 public class MqttConnectOptions {

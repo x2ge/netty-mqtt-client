@@ -1,4 +1,4 @@
-package com.wge.netty.mqtt;
+package com.x2ge.mqtt;
 
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.*;

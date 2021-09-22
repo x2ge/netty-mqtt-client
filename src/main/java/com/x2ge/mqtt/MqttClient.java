@@ -1,7 +1,7 @@
-package com.wge.netty.mqtt;
+package com.x2ge.mqtt;
 
-import com.wge.netty.mqtt.utils.AsyncTask;
-import com.wge.netty.mqtt.utils.Log;
+import com.x2ge.mqtt.utils.AsyncTask;
+import com.x2ge.mqtt.utils.Log;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;

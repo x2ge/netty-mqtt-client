@@ -1,6 +1,6 @@
-package com.wge.netty.mqtt;
+package com.x2ge.mqtt;
 
-import com.wge.netty.mqtt.utils.AsyncTask;
+import com.x2ge.mqtt.utils.AsyncTask;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessage;
 

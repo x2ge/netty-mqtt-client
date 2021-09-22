@@ -1,7 +1,7 @@
-package com.wge.netty.mqtt.example;
+package com.x2ge.mqtt.example;
 
-import com.wge.netty.mqtt.MqttClient;
-import com.wge.netty.mqtt.MqttConnectOptions;
+import com.x2ge.mqtt.MqttClient;
+import com.x2ge.mqtt.MqttConnectOptions;
 
 import java.nio.charset.StandardCharsets;
 

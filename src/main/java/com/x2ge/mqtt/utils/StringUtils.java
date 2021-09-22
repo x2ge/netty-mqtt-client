@@ -1,4 +1,4 @@
-package com.wge.netty.mqtt.utils;
+package com.x2ge.mqtt.utils;
 
 public class StringUtils {
 
