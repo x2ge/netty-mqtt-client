@@ -6,7 +6,8 @@ plugins {
 }
 
 group 'io.github.x2ge'
-version '1.0.0-SNAPSHOT'
+version '1.0.1'
+//version '1.0.0-SNAPSHOT'
 
 compileJava {
     sourceCompatibility = 1.8

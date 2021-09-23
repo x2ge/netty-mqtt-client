@@ -3,6 +3,15 @@ task sourceJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+tasks.withType(Javadoc) {
+    options.encoding = "UTF-8"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 publishing {
     publications {
         myLib(MavenPublication) {
@@ -12,6 +21,7 @@ publishing {
 
             from components.java
             artifact sourceJar
+            artifact javadocJar
 
             pom {
                 name = project.name
