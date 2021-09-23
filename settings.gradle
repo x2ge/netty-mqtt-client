@@ -1,0 +1,3 @@
+rootProject.name = 'netty-mqtt-client'
+include 'example'
+

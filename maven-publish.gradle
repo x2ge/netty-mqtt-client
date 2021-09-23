@@ -1,0 +1,85 @@
+task sourceJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = "UTF-8"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        myLib(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            pom {
+                name = project.name
+                description = "mqtt client for java or android"
+                url = "https://github.com/x2ge/netty-mqtt-client"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = developerId
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/x2ge/netty-mqtt-client.git"
+                    developerConnection = "scm:git:https://github.com/x2ge/netty-mqtt-client.git"
+                    url = "https://github.com/x2ge/netty-mqtt-client"
+                }
+            }
+        }
+    }
+    repositories {
+        // releases 仓库
+        maven {
+            name 'Sonatype'
+            url 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = ossrhUsername // 之前在 sonatype 注册的账户名
+                password = ossrhPassword  // 对应的密码
+            }
+        }
+        // snapshots 仓库
+        maven {
+            name = 'SonatypeSnapshot'
+            url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+        // 本地 snapshots 仓库
+        maven {
+            allowInsecureProtocol true
+            name = 'LocalSnapshot'
+            url = 'http://192.168.46.167:9191/repository/maven-snapshots/'
+            credentials {
+                username = "admin"
+                password = "admin123"
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.myLib
+}

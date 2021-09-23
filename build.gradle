@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group 'io.github.x2ge'
+version '1.0.1'
+//version '1.0.0-SNAPSHOT'
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    [compileJava]*.options*.encoding = 'UTF-8'
+}
+
+repositories {
+    maven {
+        allowInsecureProtocol = true
+        url "http://192.168.46.167:9191/repository/maven-public/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.netty:netty-all:4.1.68.Final'
+}
+
+apply from: 'maven-publish.gradle'
+

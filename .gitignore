@@ -1,0 +1,5 @@
+build
+.gradle
+
+/gradle.properties
+/quwei_0xF32DF4F4_SECRET.gpg
