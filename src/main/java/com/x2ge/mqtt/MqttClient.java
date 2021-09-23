@@ -201,7 +201,7 @@ public class MqttClient {
         }
     }
 
-    private void close() {
+    public void close() {
         setConnected(false);
         setClosed(true);
 
