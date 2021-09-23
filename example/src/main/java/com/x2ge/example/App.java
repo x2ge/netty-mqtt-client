@@ -16,7 +16,7 @@ public class App {
                 try {
                     mqttClient.subscribe("netty_mqtt_c1");
                     mqttClient.subscribe("testtopic/#");
-                    mqttClient.publish("netty_mqtt_c1", "hello netty mqtt!");
+                    mqttClient.publish("netty_mqtt_c1", "hello, netty mqtt!");
                     mqttClient.unsubscribe("netty_mqtt_c1");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -54,6 +54,8 @@ public class App {
         options.setCleanSession(true);
         mqttClient.connect(options);
 
+//        mqttClient.close();
         for (; ; ) ;
+
     }
 }

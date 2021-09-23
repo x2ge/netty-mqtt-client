@@ -54,7 +54,7 @@ publishing {
             name 'Sonatype'
             url 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
             credentials {
-                username = ossrhUsername // 之前在 sonatype 注册的账户名
+                username = ossrhUsername  // 之前在 sonatype 注册的账户名
                 password = ossrhPassword  // 对应的密码
             }
         }
