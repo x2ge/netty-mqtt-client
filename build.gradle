@@ -1,9 +1,18 @@
 plugins {
     id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group 'com.wge.netty.mqtt'
+group 'io.github.x2ge'
 version '1.0-SNAPSHOT'
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    [compileJava]*.options*.encoding = 'UTF-8'
+}
 
 repositories {
     maven {
@@ -17,6 +26,5 @@ dependencies {
     implementation 'io.netty:netty-all:4.1.68.Final'
 }
 
-test {
-    useJUnitPlatform()
-}
+apply from: 'maven-publish.gradle'
+

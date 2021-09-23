@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group 'com.x2ge.mqtt'
+version '1.0.0-SNAPSHOT'
+
+repositories {
+//    maven {
+//        allowInsecureProtocol = true
+//        url "http://192.168.46.167:9191/repository/maven-public/"
+//    }
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.github.x2ge:netty-mqtt-client:1.0-SNAPSHOT'
+}
+

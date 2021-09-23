@@ -1,7 +1,6 @@
 package com.x2ge.mqtt;
 
 import com.x2ge.mqtt.utils.AsyncTask;
-import com.x2ge.mqtt.utils.Log;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -16,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MqttClient {
 
@@ -64,10 +65,10 @@ public class MqttClient {
                             });
                     ChannelFuture ch = b.connect(options.getHost(), options.getPort()).sync();
                     channel = ch.channel();
-                    Log.i("--->" + channel.localAddress().toString());
+                    Logger.getLogger("mqtt").log(Level.INFO, "--->" + channel.localAddress().toString());
                 } catch (Exception e) {
 //                    e.printStackTrace();
-                    Log.i("连接异常：" + e);
+                    Logger.getLogger("mqtt").log(Level.INFO, "连接异常：" + e);
                     group.shutdownGracefully();
                     onConnectFailed(e);
                 }
@@ -81,7 +82,7 @@ public class MqttClient {
                     channel.closeFuture().sync();
                 } catch (InterruptedException e) {
 //                    e.printStackTrace();
-                    Log.i("连接断开：" + e);
+                    Logger.getLogger("mqtt").log(Level.INFO, "连接断开：" + e);
                     group.shutdownGracefully();
                 }
                 return null;
@@ -98,11 +99,11 @@ public class MqttClient {
             String s = connectProcessor.connect(channel, options, actionTimeout);
             if (ProcessorResult.RESULT_SUCCESS.equals(s)) {
                 // 连接成功
-                Log.i("连接成功");
+                Logger.getLogger("mqtt").log(Level.INFO, "连接成功");
                 onConnected();
             } else {
                 // 连接取消
-                Log.i("连接取消");
+                Logger.getLogger("mqtt").log(Level.INFO, "连接取消");
             }
         } catch (Exception e) {
 //            e.printStackTrace();
@@ -110,9 +111,9 @@ public class MqttClient {
             // 连接取消、连接超时、连接异常
             if (e instanceof CancellationException) {
                 // 连接取消
-                Log.i("连接取消");
+                Logger.getLogger("mqtt").log(Level.INFO, "连接取消");
             } else {
-                Log.i("连接异常：" + e);
+                Logger.getLogger("mqtt").log(Level.INFO, "连接异常：" + e);
                 onConnectFailed(e);
             }
             close();
@@ -134,16 +135,16 @@ public class MqttClient {
         try {
             String result = sp.subscribe(channel, topics, actionTimeout);
             if (ProcessorResult.RESULT_SUCCESS.equals(result)) {
-                Log.i("-->订阅成功：" + Arrays.toString(topics));
+                Logger.getLogger("mqtt").log(Level.INFO, "-->订阅成功：" + Arrays.toString(topics));
             } else {
-                Log.i("-->订阅取消：" + Arrays.toString(topics));
+                Logger.getLogger("mqtt").log(Level.INFO, "-->订阅取消：" + Arrays.toString(topics));
             }
         } catch (Exception e) {
 //            e.printStackTrace();
             if (e instanceof CancellationException) {
-                Log.i("-->订阅取消：" + Arrays.toString(topics));
+                Logger.getLogger("mqtt").log(Level.INFO, "-->订阅取消：" + Arrays.toString(topics));
             } else {
-                Log.i("-->订阅异常：" + Arrays.toString(topics) + "    " + e);
+                Logger.getLogger("mqtt").log(Level.INFO, "-->订阅异常：" + Arrays.toString(topics) + "    " + e);
                 throw e;
             }
         }
@@ -156,16 +157,16 @@ public class MqttClient {
         try {
             String result = usp.unsubscribe(channel, topics, actionTimeout);
             if (ProcessorResult.RESULT_SUCCESS.equals(result)) {
-                Log.i("-->取消订阅成功：" + Arrays.toString(topics));
+                Logger.getLogger("mqtt").log(Level.INFO, "-->取消订阅成功：" + Arrays.toString(topics));
             } else {
-                Log.i("-->取消订阅取消：" + Arrays.toString(topics));
+                Logger.getLogger("mqtt").log(Level.INFO, "-->取消订阅取消：" + Arrays.toString(topics));
             }
         } catch (Exception e) {
 //            e.printStackTrace();
             if (e instanceof CancellationException) {
-                Log.i("-->取消订阅取消：" + Arrays.toString(topics));
+                Logger.getLogger("mqtt").log(Level.INFO, "-->取消订阅取消：" + Arrays.toString(topics));
             } else {
-                Log.i("-->取消订阅异常：" + Arrays.toString(topics) + "    " + e);
+                Logger.getLogger("mqtt").log(Level.INFO, "-->取消订阅异常：" + Arrays.toString(topics) + "    " + e);
                 throw e;
             }
         }
@@ -178,16 +179,16 @@ public class MqttClient {
         try {
             String result = pp.publish(channel, topic, content, actionTimeout);
             if (ProcessorResult.RESULT_SUCCESS.equals(result)) {
-                Log.i("-->发布成功：" + content);
+                Logger.getLogger("mqtt").log(Level.INFO, "-->发布成功：" + content);
             } else {
-                Log.i("-->发布取消：" + content);
+                Logger.getLogger("mqtt").log(Level.INFO, "-->发布取消：" + content);
             }
         } catch (Exception e) {
 //            e.printStackTrace();
             if (e instanceof CancellationException) {
-                Log.i("发布取消：" + content);
+                Logger.getLogger("mqtt").log(Level.INFO, "发布取消：" + content);
             } else {
-                Log.i("-->发布异常：" + content + "    " + e);
+                Logger.getLogger("mqtt").log(Level.INFO, "-->发布异常：" + content + "    " + e);
                 throw e;
             }
         }
@@ -282,7 +283,7 @@ public class MqttClient {
     }
 
     private void onMessageArrived(String topic, String s) {
-        Log.i("-->收到消息：" + topic + " | " + s);
+        Logger.getLogger("mqtt").log(Level.INFO, "-->收到消息：" + topic + " | " + s);
         if (callback != null) {
             callback.onMessageArrived(topic, s);
         }
@@ -295,7 +296,7 @@ public class MqttClient {
             if (msgx == null) {
                 return;
             }
-            Log.i("--channelRead0-->" + msgx);
+            Logger.getLogger("mqtt").log(Level.INFO, "--channelRead0-->" + msgx);
 
             MqttMessage msg = (MqttMessage) msgx;
             MqttFixedHeader mqttFixedHeader = msg.fixedHeader();
@@ -358,7 +359,7 @@ public class MqttClient {
 
         @Override
         public void onConnectLost(Throwable t) {
-            Log.i("-->发生异常：" + t);
+            Logger.getLogger("mqtt").log(Level.INFO, "-->发生异常：" + t);
             MqttClient.this.onConnectLost(t);
         }
     }
