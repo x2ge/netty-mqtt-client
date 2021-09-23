@@ -5,7 +5,7 @@ task sourceJar(type: Jar, dependsOn: classes) {
 
 publishing {
     publications {
-        lib(MavenPublication) {
+        myLib(MavenPublication) {
             groupId project.group
             artifactId project.name
             version project.version
@@ -25,9 +25,9 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = "${developerId}"
-                        name = "${developerName}"
-                        email = "${developerEmail}"
+                        id = developerId
+                        name = developerName
+                        email = developerEmail
                     }
                 }
                 scm {
@@ -44,8 +44,8 @@ publishing {
             name 'Sonatype'
             url 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
             credentials {
-                username = "${ossrhUsername}"  // 之前在 sonatype 注册的账户名
-                password = "${ossrhPassword}"  // 对应的密码
+                username = ossrhUsername // 之前在 sonatype 注册的账户名
+                password = ossrhPassword  // 对应的密码
             }
         }
         // snapshots 仓库
@@ -53,8 +53,8 @@ publishing {
             name = 'SonatypeSnapshot'
             url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             credentials {
-                username = "${ossrhUsername}"
-                password = "${ossrhPassword}"
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
         // 本地 snapshots 仓库
@@ -71,5 +71,5 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.lib
+    sign publishing.publications.myLib
 }
