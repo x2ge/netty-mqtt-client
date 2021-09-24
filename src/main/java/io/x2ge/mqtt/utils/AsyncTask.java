@@ -1,4 +1,4 @@
-package com.x2ge.mqtt.utils;
+package io.x2ge.mqtt.utils;
 
 import java.util.concurrent.*;
 
@@ -91,7 +91,7 @@ public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
         return this;
     }
 
-    interface Callback {
+    public interface Callback {
         void onDone();
     }
 

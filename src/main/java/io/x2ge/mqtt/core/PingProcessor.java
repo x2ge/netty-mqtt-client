@@ -1,8 +1,8 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt.core;
 
-import com.x2ge.mqtt.utils.AsyncTask;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessage;
+import io.x2ge.mqtt.utils.AsyncTask;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -76,7 +76,7 @@ public class PingProcessor extends AsyncTask<String> {
         receivedAck = true;
     }
 
-    interface Callback {
+    public interface Callback {
         void onConnectLost(Throwable t);
     }
 

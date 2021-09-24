@@ -1,7 +1,8 @@
-package com.x2ge.example;
+package io.x2ge.example;
 
-import com.x2ge.mqtt.MqttClient;
-import com.x2ge.mqtt.MqttConnectOptions;
+import io.x2ge.mqtt.MqttClient;
+import io.x2ge.mqtt.MqttConnectOptions;
+import io.x2ge.mqtt.utils.Log;
 
 import java.nio.charset.StandardCharsets;
 
@@ -30,7 +31,7 @@ public class App {
 
             @Override
             public void onConnectLost(Throwable e) {
-
+                Log.i("-->onConnectLost : " + e);
             }
 
             @Override
@@ -50,12 +51,17 @@ public class App {
         options.setClientIdentifier("netty_mqtt_c1");
         options.setUserName("testuser");
         options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
-        options.setKeepAliveTime(10);
+        options.setKeepAliveTime(5);
         options.setCleanSession(true);
-        mqttClient.connect(options);
+        mqttClient.setActionTimeout(3000);
+        mqttClient.setReconnectOnLost(5, 10000);
+        try {
+            mqttClient.connect(options);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 //        mqttClient.close();
         for (; ; ) ;
-
     }
 }

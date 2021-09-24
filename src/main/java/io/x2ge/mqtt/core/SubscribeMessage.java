@@ -1,4 +1,4 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt.core;
 
 public class SubscribeMessage {
     private String topic;

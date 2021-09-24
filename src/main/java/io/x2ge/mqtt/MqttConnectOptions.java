@@ -1,7 +1,7 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt;
 
-import com.x2ge.mqtt.utils.StringUtils;
 import io.netty.handler.codec.mqtt.MqttVersion;
+import io.x2ge.mqtt.utils.StringUtils;
 
 public class MqttConnectOptions {
     private MqttVersion mqttVersion = MqttVersion.MQTT_3_1_1;
@@ -58,6 +58,12 @@ public class MqttConnectOptions {
         return isCleanSession;
     }
 
+    /**
+     * 如果清理会话（CleanSession）标志被设置为true，
+     * 客户端和服务端在重连后，会丢弃之前的任何会话相关内容及配置
+     *
+     * @param cleanSession true 重连后丢弃相关数据
+     */
     public void setCleanSession(boolean cleanSession) {
         this.isCleanSession = cleanSession;
     }
@@ -98,6 +104,9 @@ public class MqttConnectOptions {
         return keepAliveTime;
     }
 
+    /**
+     * @param keepAliveTime 维持连接时间，秒
+     */
     public void setKeepAliveTime(int keepAliveTime) {
         this.keepAliveTime = keepAliveTime;
     }

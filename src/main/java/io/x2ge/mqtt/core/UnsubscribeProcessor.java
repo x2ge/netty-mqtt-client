@@ -1,14 +1,15 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt.core;
 
-import com.x2ge.mqtt.utils.AsyncTask;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessageIdAndPropertiesVariableHeader;
-import io.netty.handler.codec.mqtt.MqttSubAckMessage;
-import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
+import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
+import io.x2ge.mqtt.utils.AsyncTask;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-public class SubscribeProcessor extends AsyncTask<String> {
+public class UnsubscribeProcessor extends AsyncTask<String> {
 
     public int msgId;
     private boolean accepted = false;
@@ -32,7 +33,7 @@ public class SubscribeProcessor extends AsyncTask<String> {
         return accepted ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
-    public String subscribe(Channel channel, String[] topics, long timeout) throws Exception {
+    public String unsubscribe(Channel channel, String[] topics, long timeout) throws Exception {
         int id = 0;
         String s;
         try {
@@ -40,7 +41,7 @@ public class SubscribeProcessor extends AsyncTask<String> {
 
             msgId = id;
 
-            MqttSubscribeMessage msg = MqttProtocolUtil.subscribeMessage(id, topics);
+            MqttUnsubscribeMessage msg = MqttProtocolUtil.unsubscribeMessage(id, Arrays.asList(topics));
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {
@@ -49,7 +50,7 @@ public class SubscribeProcessor extends AsyncTask<String> {
         return s;
     }
 
-    public void processAck(Channel channel, MqttSubAckMessage msg) {
+    public void processAck(Channel channel, MqttUnsubAckMessage msg) {
         MqttMessageIdAndPropertiesVariableHeader variableHeader = msg.idAndPropertiesVariableHeader();
         if (variableHeader.messageId() == msgId) {
             accepted = true;
