@@ -53,7 +53,9 @@ public class App {
         options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
         options.setKeepAliveTime(5);
         options.setCleanSession(true);
+        // 配置动作超时时间
         mqttClient.setActionTimeout(3000);
+        // 配置雕像重连
         mqttClient.setReconnectOnLost(5, 10000);
         try {
             mqttClient.connect(options);
@@ -63,5 +65,6 @@ public class App {
 
 //        mqttClient.close();
         for (; ; ) ;
+
     }
 }
