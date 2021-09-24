@@ -1,4 +1,4 @@
-package com.x2ge.mqtt.utils;
+package io.x2ge.mqtt.utils;
 
 import java.lang.management.ManagementFactory;
 import java.util.logging.ConsoleHandler;

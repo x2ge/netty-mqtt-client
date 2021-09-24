@@ -1,6 +1,5 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt;
 
-import com.x2ge.mqtt.utils.AsyncTask;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -9,6 +8,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.mqtt.*;
 import io.netty.handler.logging.LoggingHandler;
+import io.x2ge.mqtt.core.*;
+import io.x2ge.mqtt.utils.AsyncTask;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

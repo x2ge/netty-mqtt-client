@@ -1,4 +1,4 @@
-package com.x2ge.example;
+package io.x2ge.example;
 
 import com.x2ge.mqtt.MqttClient;
 import com.x2ge.mqtt.MqttConnectOptions;

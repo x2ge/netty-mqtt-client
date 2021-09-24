@@ -1,7 +1,7 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt;
 
-import com.x2ge.mqtt.utils.StringUtils;
 import io.netty.handler.codec.mqtt.MqttVersion;
+import io.x2ge.mqtt.utils.StringUtils;
 
 public class MqttConnectOptions {
     private MqttVersion mqttVersion = MqttVersion.MQTT_3_1_1;

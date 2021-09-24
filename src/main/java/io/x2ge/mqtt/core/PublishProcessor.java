@@ -1,15 +1,15 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt.core;
 
-import com.x2ge.mqtt.utils.AsyncTask;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.MqttMessageIdAndPropertiesVariableHeader;
-import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
-import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
+import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
+import io.netty.handler.codec.mqtt.MqttPubAckMessage;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.x2ge.mqtt.utils.AsyncTask;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-public class UnsubscribeProcessor extends AsyncTask<String> {
+public class PublishProcessor extends AsyncTask<String> {
 
     public int msgId;
     private boolean accepted = false;
@@ -33,7 +33,7 @@ public class UnsubscribeProcessor extends AsyncTask<String> {
         return accepted ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
-    public String unsubscribe(Channel channel, String[] topics, long timeout) throws Exception {
+    public String publish(Channel channel, String topic, String content, long timeout) throws Exception {
         int id = 0;
         String s;
         try {
@@ -41,7 +41,12 @@ public class UnsubscribeProcessor extends AsyncTask<String> {
 
             msgId = id;
 
-            MqttUnsubscribeMessage msg = MqttProtocolUtil.unsubscribeMessage(id, Arrays.asList(topics));
+            MqttPublishMessage msg = MqttProtocolUtil.publishMessage(topic,
+                    content.getBytes(StandardCharsets.UTF_8),
+                    1,
+                    id,
+                    false
+            );
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {
@@ -50,8 +55,8 @@ public class UnsubscribeProcessor extends AsyncTask<String> {
         return s;
     }
 
-    public void processAck(Channel channel, MqttUnsubAckMessage msg) {
-        MqttMessageIdAndPropertiesVariableHeader variableHeader = msg.idAndPropertiesVariableHeader();
+    public void processAck(Channel channel, MqttPubAckMessage msg) {
+        MqttMessageIdVariableHeader variableHeader = msg.variableHeader();
         if (variableHeader.messageId() == msgId) {
             accepted = true;
         }

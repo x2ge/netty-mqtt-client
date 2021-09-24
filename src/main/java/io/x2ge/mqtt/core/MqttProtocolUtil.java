@@ -1,7 +1,8 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt.core;
 
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.*;
+import io.x2ge.mqtt.MqttConnectOptions;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

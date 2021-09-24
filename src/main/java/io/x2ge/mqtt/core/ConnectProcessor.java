@@ -1,9 +1,10 @@
-package com.x2ge.mqtt;
+package io.x2ge.mqtt.core;
 
-import com.x2ge.mqtt.utils.AsyncTask;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttConnAckMessage;
 import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
+import io.x2ge.mqtt.MqttConnectOptions;
+import io.x2ge.mqtt.utils.AsyncTask;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

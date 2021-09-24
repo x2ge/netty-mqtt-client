@@ -1,7 +1,7 @@
-package com.x2ge.mqtt.example;
+package io.x2ge.example;
 
-import com.x2ge.mqtt.MqttClient;
-import com.x2ge.mqtt.MqttConnectOptions;
+import io.x2ge.mqtt.MqttClient;
+import io.x2ge.mqtt.MqttConnectOptions;
 
 import java.nio.charset.StandardCharsets;
 
