@@ -7,7 +7,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.mqtt.*;
-import io.netty.handler.logging.LoggingHandler;
 import io.x2ge.mqtt.core.*;
 import io.x2ge.mqtt.utils.AsyncTask;
 import io.x2ge.mqtt.utils.Log;
@@ -104,7 +103,6 @@ public class MqttClient {
                             @Override
                             protected void initChannel(SocketChannel channel) throws Exception {
                                 channel.pipeline()
-                                        .addLast("log", new LoggingHandler())
                                         .addLast("decoder", new MqttDecoder())//解码
                                         .addLast("encoder", MqttEncoder.INSTANCE)//编码
                                         .addLast("handler", new Handler());
