@@ -10,12 +10,12 @@ repositories {
 //        allowInsecureProtocol = true
 //        url "http://192.168.46.167:9191/repository/maven-public/"
 //    }
-//    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/" }
     mavenCentral()
 }
 
 dependencies {
-    implementation 'io.github.x2ge:netty-mqtt-client:2.0.0'
+    implementation 'io.github.x2ge:netty-mqtt-client:2.0.1—SNAPSHOT'
 }
 
