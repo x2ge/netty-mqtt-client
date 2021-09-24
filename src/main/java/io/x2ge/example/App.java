@@ -2,6 +2,7 @@ package io.x2ge.example;
 
 import io.x2ge.mqtt.MqttClient;
 import io.x2ge.mqtt.MqttConnectOptions;
+import io.x2ge.mqtt.utils.Log;
 
 import java.nio.charset.StandardCharsets;
 
@@ -30,7 +31,7 @@ public class App {
 
             @Override
             public void onConnectLost(Throwable e) {
-
+                Log.i("-->onConnectLost : " + e);
             }
 
             @Override

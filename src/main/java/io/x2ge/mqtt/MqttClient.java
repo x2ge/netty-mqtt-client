@@ -198,11 +198,15 @@ public class MqttClient {
                         Log.i("<--重连失败：" + num);
                     }
 
+                    if (maxTimes <= num) { // 重试次数已经消耗殆尽
+                        break;
+                    }
+
                     // 判断是否timeout
-                    if (timeout > 0) {
+                    if (timeout > 0) { // 只在配置了重连超时时间情况下才进行相关判断
                         // 重连总消耗时间
                         long spendTotal = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-                        if (timeout - spendTotal <= 0) {// 超时时间已经消耗殆尽
+                        if (timeout <= spendTotal) {// 超时时间已经消耗殆尽
                             break;
                         }
                     }
@@ -218,7 +222,7 @@ public class MqttClient {
                             break;
                         }
                     }
-                } while (!isCancelled() && maxTimes > num);
+                } while (!isCancelled());
 
                 if (!isCancelled()) {
                     if (bSuccess) {
