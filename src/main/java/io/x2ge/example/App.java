@@ -52,7 +52,11 @@ public class App {
         options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
         options.setKeepAliveTime(10);
         options.setCleanSession(true);
-        mqttClient.connect(options);
+        try {
+            mqttClient.connect(options);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 //        mqttClient.close();
         for (; ; ) ;
