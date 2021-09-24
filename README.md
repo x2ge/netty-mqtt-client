@@ -13,7 +13,7 @@
     }
     
     dependencies {
-        implementation 'io.github.x2ge:netty-mqtt-client:1.0.2'
+        implementation 'io.github.x2ge:netty-mqtt-client:2.0.0'
     }
 
 #### 连接
@@ -27,6 +27,10 @@
     options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
     options.setKeepAliveTime(10);
     options.setCleanSession(true);
+    // 配置动作超时时间
+    mqttClient.setActionTimeout(3000);
+    // 配置掉线重连
+    mqttClient.setReconnectOnLost(5, 10000);
     mqttClient.connect(options);
 
 #### 监听

@@ -58,9 +58,9 @@ public class MqttClient {
     }
 
     /**
-     * 当maxTimes > 0时，如果发生掉线，则自动尝试重连，重连成功则回调onConnected方法，
+     * 当maxTimes大于0时，如果发生掉线，则自动尝试重连，重连成功则回调onConnected方法，
      * 重连次数用完则回调onConnectLost方法。
-     * 当timeout > 0时，如果整个重连过程消耗时间超过timeout，此时无论重连次数是否用完都
+     * 当timeout大于0时，如果整个重连过程消耗时间超过timeout，此时无论重连次数是否用完都
      * 停止重试，并回调onConnectLost方法。
      *
      * @param maxTimes 重试最大次数
