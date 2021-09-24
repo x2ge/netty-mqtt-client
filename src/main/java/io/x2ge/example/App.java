@@ -50,8 +50,10 @@ public class App {
         options.setClientIdentifier("netty_mqtt_c1");
         options.setUserName("testuser");
         options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
-        options.setKeepAliveTime(10);
+        options.setKeepAliveTime(5);
         options.setCleanSession(true);
+        mqttClient.setActionTimeout(3000);
+        mqttClient.setReconnectOnLost(5, 10000);
         try {
             mqttClient.connect(options);
         } catch (Exception e) {

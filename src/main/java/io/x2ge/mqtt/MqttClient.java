@@ -23,7 +23,14 @@ public class MqttClient {
 
     private MqttConnectOptions connectOptions;
     private long actionTimeout = 5000;
+    private long connectTimeout = 5000;
+
+    private int maxReconnectTimesOnLost = 0;
+    private long reconnectTimeoutOnLost = 0;
+    private final static long MIN_RECONNECT_INTERVAL = 1800L;
+
     private AsyncTask<String> connectTask;
+    private AsyncTask<String> reconnectTask;
     private Channel channel;
 
     private ConnectProcessor connectProcessor;
@@ -41,20 +48,51 @@ public class MqttClient {
         this.callback = c;
     }
 
+    /**
+     * 设置连接、订阅、取消订阅、发布消息、ping等动作的超时时间
+     *
+     * @param actionTimeout 等待动作完成的超时时间
+     */
     public void setActionTimeout(long actionTimeout) {
         this.actionTimeout = actionTimeout;
+    }
+
+    /**
+     * 当maxTimes > 0时，如果发生掉线，则自动尝试重连，重连成功则回调onConnected方法，
+     * 重连次数用完则回调onConnectLost方法。
+     * 当timeout > 0时，如果整个重连过程消耗时间超过timeout，此时无论重连次数是否用完都
+     * 停止重试，并回调onConnectLost方法。
+     *
+     * @param maxTimes 重试最大次数
+     * @param timeout  重试超时时间
+     */
+    public void setReconnectOnLost(int maxTimes, long timeout) {
+        this.maxReconnectTimesOnLost = maxTimes;
+        this.reconnectTimeoutOnLost = timeout;
     }
 
     synchronized public void connect(MqttConnectOptions options) throws Exception {
         connect(options, actionTimeout);
     }
 
-    synchronized void connect(MqttConnectOptions options, long timeout) throws Exception {
-        if (connectOptions != null) {
+    synchronized public void connect(MqttConnectOptions options, long timeout) throws Exception {
+        if (this.connectOptions != null) {
             return;
         }
-        connectOptions = options;
+        this.connectOptions = options;
+        this.connectTimeout = timeout;
 
+        try {
+            doConnect(options, timeout);
+            onConnected();
+        } catch (Exception e) {
+//            e.printStackTrace();
+            onConnectFailed(e);
+            throw e;
+        }
+    }
+
+    private void doConnect(MqttConnectOptions options, long timeout) throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
         connectTask = new AsyncTask<String>() {
             @Override
@@ -84,14 +122,13 @@ public class MqttClient {
 //            e.printStackTrace();
             Log.i("连接异常：" + e);
             group.shutdownGracefully();
-            onConnectFailed(e);
             throw e;
         }
 
         if (channel == null)
             return;
 
-        connect0(channel, options);
+        doConnect0(channel, options, timeout);
 
         connectTask = new AsyncTask<String>() {
             @Override
@@ -108,16 +145,15 @@ public class MqttClient {
         }.execute();
     }
 
-    private void connect0(Channel channel, MqttConnectOptions options) throws Exception {
+    private void doConnect0(Channel channel, MqttConnectOptions options, long timeout) throws Exception {
         if (channel == null)
             return;
 
         try {
             connectProcessor = new ConnectProcessor();
-            String s = connectProcessor.connect(channel, options, actionTimeout);
+            String s = connectProcessor.connect(channel, options, timeout);
             if (ProcessorResult.RESULT_SUCCESS.equals(s)) {
                 Log.i("-->连接成功");
-                onConnected();
             } else {
                 throw new CancellationException();
             }
@@ -127,10 +163,73 @@ public class MqttClient {
                 Log.i("-->连接取消");
             } else {
                 Log.i("-->连接异常：" + e);
-                onConnectFailed(e);
                 throw e;
             }
         }
+    }
+
+    private void doReconnect(MqttConnectOptions options, final int maxTimes, final long timeout, Throwable t) {
+        reconnectTask = new AsyncTask<String>() {
+            @Override
+            public String call() throws Exception {
+                long interval = MIN_RECONNECT_INTERVAL;
+                if (timeout > 0) {
+                    interval = timeout / maxTimes;
+                    if (interval < MIN_RECONNECT_INTERVAL)
+                        interval = MIN_RECONNECT_INTERVAL;
+                }
+
+                boolean bSuccess = false;
+                int num = 0;
+                long start = System.nanoTime();
+                do {
+                    ++num;
+                    Log.i("-->重连开始：" + num);
+                    onReconnectStart(num);
+
+                    long begin = System.nanoTime();
+                    try {
+                        doConnect(options, interval);
+                        Log.i("<--重连成功：" + num);
+                        bSuccess = true;
+                        break;
+                    } catch (Exception e) {
+//                        e.printStackTrace();
+                        Log.i("<--重连失败：" + num);
+                    }
+
+                    // 判断是否timeout
+                    if (timeout > 0) {
+                        // 重连总消耗时间
+                        long spendTotal = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+                        if (timeout - spendTotal <= 0) {// 超时时间已经消耗殆尽
+                            break;
+                        }
+                    }
+
+                    // 单次连接消耗时间
+                    long spend = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin);
+                    long sleepTime = interval - spend;
+                    if (sleepTime > 0) {
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+                            break;
+                        }
+                    }
+                } while (!isCancelled() && maxTimes > num);
+
+                if (!isCancelled()) {
+                    if (bSuccess) {
+                        onConnected();
+                    } else {
+                        onReconnectFailed(t);
+                    }
+                }
+                return null;
+            }
+        }.execute();
     }
 
 
@@ -221,6 +320,9 @@ public class MqttClient {
         setConnected(false);
         setClosed(true);
 
+        if (reconnectTask != null)
+            reconnectTask.cancel(true);
+
         if (connectProcessor != null) {
             connectProcessor.cancel(true);
         }
@@ -293,9 +395,25 @@ public class MqttClient {
 
     private void onConnectLost(Throwable t) {
         close();
-        if (callback != null) {
-            callback.onConnectLost(t);
+
+        if (maxReconnectTimesOnLost > 0) {
+            doReconnect(connectOptions, maxReconnectTimesOnLost, reconnectTimeoutOnLost, t);
+        } else {
+            if (callback != null) {
+                callback.onConnectLost(t);
+            }
         }
+    }
+
+    private void onReconnectStart(int num) {
+        if (callback != null)
+            callback.onReconnectStart(num);
+    }
+
+    private void onReconnectFailed(Throwable t) {
+        close();
+        if (callback != null)
+            callback.onConnectLost(t);
     }
 
     private void onMessageArrived(String topic, String s) {
