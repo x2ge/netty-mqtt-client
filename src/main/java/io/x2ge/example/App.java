@@ -55,7 +55,7 @@ public class App {
         options.setCleanSession(true);
         // 配置动作超时时间
         mqttClient.setActionTimeout(3000);
-        // 配置雕像重连
+        // 配置掉线重连
         mqttClient.setReconnectOnLost(5, 10000);
         try {
             mqttClient.connect(options);

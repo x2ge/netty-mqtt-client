@@ -33,7 +33,7 @@ public class PingProcessor extends AsyncTask<String> {
 
                 // 判断是否超时
                 long l = System.nanoTime() - start;
-                if (TimeUnit.NANOSECONDS.toSeconds(l) > keepAlive) {
+                if (l > TimeUnit.SECONDS.toNanos(keepAlive) / 2) {
                     TimeoutException te = new TimeoutException("Did not receive a response for a long time : " + keepAlive + "s");
                     if (cb != null) {
                         cb.onConnectLost(te);
