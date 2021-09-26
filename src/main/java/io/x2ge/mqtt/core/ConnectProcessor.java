@@ -12,26 +12,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConnectProcessor extends AsyncTask<String> {
 
-    private final AtomicBoolean accepted = new AtomicBoolean(false);
+    private final AtomicBoolean acked = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
-        while (!isCancelled() && !accepted.get()) {
+        while (!isCancelled() && !acked.get()) {
 
             if (e != null) {
                 throw e;
             }
 
-            synchronized (accepted) {
+            synchronized (acked) {
                 try {
-                    accepted.wait(100L);
+                    acked.wait(300L);
                 } catch (Exception ex) {
 //                    ex.printStackTrace();
                 }
             }
         }
-        return accepted.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
+        return acked.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
     public String connect(Channel channel, MqttConnectOptions options, long timeout) throws Exception {
@@ -44,9 +44,9 @@ public class ConnectProcessor extends AsyncTask<String> {
         String errormsg = "";
         switch (mqttConnAckVariableHeader.connectReturnCode()) {
             case CONNECTION_ACCEPTED:
-                synchronized (accepted) {
-                    accepted.set(true);
-                    accepted.notify();
+                synchronized (acked) {
+                    acked.set(true);
+                    acked.notify();
                 }
                 return;
             case CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
@@ -69,9 +69,9 @@ public class ConnectProcessor extends AsyncTask<String> {
                 break;
         }
 
-        synchronized (accepted) {
+        synchronized (acked) {
             e = new IOException(errormsg);
-            accepted.notify();
+            acked.notify();
         }
     }
 }
