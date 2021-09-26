@@ -13,26 +13,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class UnsubscribeProcessor extends AsyncTask<String> {
 
     public int msgId;
-    private final AtomicBoolean acked = new AtomicBoolean(false);
+    private final AtomicBoolean receivedAck = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
-        while (!isCancelled() && !acked.get()) {
+        while (!isCancelled() && !receivedAck.get()) {
 
             if (e != null) {
                 throw e;
             }
 
-            synchronized (acked) {
+            synchronized (receivedAck) {
                 try {
-                    acked.wait(300L);
+                    receivedAck.wait(300L);
                 } catch (Exception ex) {
 //                    ex.printStackTrace();
                 }
             }
         }
-        return acked.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
+        return receivedAck.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
     public String unsubscribe(Channel channel, String[] topics, long timeout) throws Exception {
@@ -55,9 +55,9 @@ public class UnsubscribeProcessor extends AsyncTask<String> {
     public void processAck(Channel channel, MqttUnsubAckMessage msg) {
         MqttMessageIdAndPropertiesVariableHeader variableHeader = msg.idAndPropertiesVariableHeader();
         if (variableHeader.messageId() == msgId) {
-            synchronized (acked) {
-                acked.set(true);
-                acked.notify();
+            synchronized (receivedAck) {
+                receivedAck.set(true);
+                receivedAck.notify();
             }
         }
     }

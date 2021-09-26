@@ -14,20 +14,20 @@ public class PingProcessor extends AsyncTask<String> {
     public int keepAlive = 60;
     public Callback cb;
 
-    private final AtomicBoolean acked = new AtomicBoolean(false);
+    private final AtomicBoolean receivedAck = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
         while (!isCancelled()) {
 
-            acked.set(false);
+            receivedAck.set(false);
 
             ping(channel);
 
             long start = System.nanoTime();
             while (!isCancelled()) {
-                if (acked.get()) {
+                if (receivedAck.get()) {
                     // 已经收到ping应答，跳出内循环，延时后进行下一次ping
                     break;
                 }
@@ -42,9 +42,9 @@ public class PingProcessor extends AsyncTask<String> {
                     throw te;
                 }
 
-                synchronized (acked) {
+                synchronized (receivedAck) {
                     try {
-                        acked.wait(300L);
+                        receivedAck.wait(300L);
                     } catch (Exception ex) {
 //                        ex.printStackTrace();
                     }
@@ -75,9 +75,9 @@ public class PingProcessor extends AsyncTask<String> {
     }
 
     public void processAck(Channel channel, MqttMessage msg) {
-        synchronized (acked) {
-            acked.set(true);
-            acked.notify();
+        synchronized (receivedAck) {
+            receivedAck.set(true);
+            receivedAck.notify();
         }
     }
 
