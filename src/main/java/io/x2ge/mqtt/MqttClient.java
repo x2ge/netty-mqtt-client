@@ -11,6 +11,7 @@ import io.x2ge.mqtt.core.*;
 import io.x2ge.mqtt.utils.AsyncTask;
 import io.x2ge.mqtt.utils.Log;
 
+import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +106,7 @@ public class MqttClient {
                                 channel.pipeline()
                                         .addLast("decoder", new MqttDecoder())//解码
                                         .addLast("encoder", MqttEncoder.INSTANCE)//编码
-                                        .addLast("handler", new Handler());
+                                        .addLast("handler", new MqttHandler());
                             }
                         });
                 ChannelFuture ch = b.connect(options.getHost(), options.getPort()).sync();
@@ -118,7 +119,7 @@ public class MqttClient {
             connectTask.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
 //            e.printStackTrace();
-            Log.i("连接异常：" + e);
+            Log.i("-->连接异常：" + e);
             group.shutdownGracefully();
             throw e;
         }
@@ -135,8 +136,17 @@ public class MqttClient {
                     channel.closeFuture().sync();
                 } catch (Exception e) {
 //                    e.printStackTrace();
-                    Log.i("连接断开：" + e);
+                    Log.i("-->连接断开异常：" + e);
+                } finally {
                     group.shutdownGracefully();
+                    if (!isClosed()) {
+                        // 非主动断开，可能源于服务器原因
+                        Exception e = new ConnectException("Connection closed unexpectedly");
+                        Log.i("-->连接断开：" + e);
+                        onConnectLost(e);
+                    } else {
+                        Log.i("-->连接断开：主动");
+                    }
                 }
                 return null;
             }
@@ -384,6 +394,7 @@ public class MqttClient {
 
     private void onConnected() {
         setConnected(true);
+        setClosed(false);
         startPingTask(channel, connectOptions.getKeepAliveTime());
         if (callback != null)
             callback.onConnected();
@@ -425,7 +436,32 @@ public class MqttClient {
         }
     }
 
-    class Handler extends SimpleChannelInboundHandler<Object> {
+    class MqttHandler extends SimpleChannelInboundHandler<Object> {
+
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            super.channelActive(ctx);
+            Log.i("");
+        }
+
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            super.channelInactive(ctx);
+            Log.i("");
+        }
+
+        @Override
+        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+            super.channelRegistered(ctx);
+            Log.i("");
+        }
+
+        @Override
+        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+            super.channelUnregistered(ctx);
+            Log.i("");
+        }
+
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, Object msgx) throws Exception {
@@ -488,6 +524,30 @@ public class MqttClient {
                 default:
                     break;
             }
+        }
+
+        @Override
+        public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+            super.channelReadComplete(ctx);
+//            Log.i("");
+        }
+
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            super.userEventTriggered(ctx, evt);
+            Log.i("");
+        }
+
+        @Override
+        public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+            super.channelWritabilityChanged(ctx);
+            Log.i("");
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+            super.exceptionCaught(ctx, cause);
+            Log.i("-->exceptionCaught : " + cause);
         }
     }
 
