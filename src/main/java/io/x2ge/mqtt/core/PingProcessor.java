@@ -6,6 +6,7 @@ import io.x2ge.mqtt.utils.AsyncTask;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PingProcessor extends AsyncTask<String> {
 
@@ -13,20 +14,20 @@ public class PingProcessor extends AsyncTask<String> {
     public int keepAlive = 60;
     public Callback cb;
 
-    private boolean receivedAck = false;
+    private final AtomicBoolean receivedAck = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
         while (!isCancelled()) {
 
-            receivedAck = false;
+            receivedAck.set(false);
 
             ping(channel);
 
             long start = System.nanoTime();
             while (!isCancelled()) {
-                if (receivedAck) {
+                if (receivedAck.get()) {
                     // 已经收到ping应答，跳出内循环，延时后进行下一次ping
                     break;
                 }
@@ -41,11 +42,12 @@ public class PingProcessor extends AsyncTask<String> {
                     throw te;
                 }
 
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-                    break;
+                synchronized (receivedAck) {
+                    try {
+                        receivedAck.wait(100L);
+                    } catch (Exception ex) {
+//                        ex.printStackTrace();
+                    }
                 }
             }
 
@@ -73,7 +75,10 @@ public class PingProcessor extends AsyncTask<String> {
     }
 
     public void processAck(Channel channel, MqttMessage msg) {
-        receivedAck = true;
+        synchronized (receivedAck) {
+            receivedAck.set(true);
+            receivedAck.notify();
+        }
     }
 
     public interface Callback {

@@ -8,29 +8,31 @@ import io.x2ge.mqtt.utils.AsyncTask;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PublishProcessor extends AsyncTask<String> {
 
     public int msgId;
-    private boolean accepted = false;
+    private final AtomicBoolean accepted = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
-        while (!isCancelled() && !accepted) {
+        while (!isCancelled() && !accepted.get()) {
 
             if (e != null) {
                 throw e;
             }
 
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-//                e.printStackTrace();
-                break;
+            synchronized (accepted) {
+                try {
+                    accepted.wait(100L);
+                } catch (Exception ex) {
+//                    ex.printStackTrace();
+                }
             }
         }
-        return accepted ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
+        return accepted.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
     public String publish(Channel channel, String topic, String content, long timeout) throws Exception {
@@ -58,7 +60,10 @@ public class PublishProcessor extends AsyncTask<String> {
     public void processAck(Channel channel, MqttPubAckMessage msg) {
         MqttMessageIdVariableHeader variableHeader = msg.variableHeader();
         if (variableHeader.messageId() == msgId) {
-            accepted = true;
+            synchronized (accepted) {
+                accepted.set(true);
+                accepted.notify();
+            }
         }
     }
 }
