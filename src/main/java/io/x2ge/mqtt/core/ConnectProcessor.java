@@ -8,28 +8,30 @@ import io.x2ge.mqtt.utils.AsyncTask;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConnectProcessor extends AsyncTask<String> {
 
-    private boolean accepted = false;
+    private final AtomicBoolean receivedAck = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
-        while (!isCancelled() && !accepted) {
+        while (!isCancelled() && !receivedAck.get()) {
 
             if (e != null) {
                 throw e;
             }
 
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-//                e.printStackTrace();
-                break;
+            synchronized (receivedAck) {
+                try {
+                    receivedAck.wait(300L);
+                } catch (Exception ex) {
+//                    ex.printStackTrace();
+                }
             }
         }
-        return accepted ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
+        return receivedAck.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
     public String connect(Channel channel, MqttConnectOptions options, long timeout) throws Exception {
@@ -42,7 +44,10 @@ public class ConnectProcessor extends AsyncTask<String> {
         String errormsg = "";
         switch (mqttConnAckVariableHeader.connectReturnCode()) {
             case CONNECTION_ACCEPTED:
-                accepted = true;
+                synchronized (receivedAck) {
+                    receivedAck.set(true);
+                    receivedAck.notify();
+                }
                 return;
             case CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD:
                 errormsg = "用户名密码错误";
@@ -64,6 +69,9 @@ public class ConnectProcessor extends AsyncTask<String> {
                 break;
         }
 
-        e = new IOException(errormsg);
+        synchronized (receivedAck) {
+            e = new IOException(errormsg);
+            receivedAck.notify();
+        }
     }
 }

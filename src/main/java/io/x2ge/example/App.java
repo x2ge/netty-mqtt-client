@@ -10,15 +10,29 @@ public class App {
 
     public static void main(String[] args) {
         MqttClient mqttClient = new MqttClient();
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setHost("localhost");
+        options.setPort(1883);
+        options.setClientIdentifier("netty_mqtt_c1");
+        options.setUserName("testuser");
+        options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
+        options.setKeepAliveTime(5);
+        options.setCleanSession(true);
+        // 配置动作超时时间
+        mqttClient.setActionTimeout(3000);
+        // 配置掉线重连
+        mqttClient.setReconnectOnLost(5, 10000);
+
         mqttClient.setCallback(new MqttClient.Callback() {
             @Override
             public void onConnected() {
                 // test
                 try {
                     mqttClient.subscribe("netty_mqtt_c1");
-                    mqttClient.subscribe("testtopic/#");
+//                    mqttClient.subscribe("testtopic/#");
                     mqttClient.publish("netty_mqtt_c1", "hello, netty mqtt!");
                     mqttClient.unsubscribe("netty_mqtt_c1");
+//                    mqttClient.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -44,26 +58,14 @@ public class App {
 
             }
         });
-        MqttConnectOptions options = new MqttConnectOptions();
-        options.setHost("localhost");
-        options.setPort(1883);
 
-        options.setClientIdentifier("netty_mqtt_c1");
-        options.setUserName("testuser");
-        options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
-        options.setKeepAliveTime(5);
-        options.setCleanSession(true);
-        // 配置动作超时时间
-        mqttClient.setActionTimeout(3000);
-        // 配置雕像重连
-        mqttClient.setReconnectOnLost(5, 10000);
         try {
             mqttClient.connect(options);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+//            Log.i("--->连接失败了：" + e);
         }
 
-//        mqttClient.close();
         for (; ; ) ;
 
     }
