@@ -13,7 +13,7 @@
     }
     
     dependencies {
-        implementation 'io.github.x2ge:netty-mqtt-client:2.0.1'
+        implementation 'io.github.x2ge:netty-mqtt-client:2.0.2'
     }
 
 #### 连接
