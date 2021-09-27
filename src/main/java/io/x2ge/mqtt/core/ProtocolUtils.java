@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MqttProtocolUtil {
+public class ProtocolUtils {
     public static MqttConnectMessage connectMessage(MqttConnectOptions options) {
-        MqttVersion version = options.getMqttVersion();
         MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.CONNECT, false, MqttQoS.AT_MOST_ONCE,
                 false, 10);
+        MqttVersion version = options.getMqttVersion();
         MqttConnectVariableHeader mqttConnectVariableHeader = new MqttConnectVariableHeader(version.protocolName(),
                 version.protocolLevel(), options.isHasUserName(), options.isHasPassword(), options.isWillRetain(),
                 options.getWillQos(), options.isWillFlag(), options.isCleanSession(), options.getKeepAliveTime());
@@ -24,11 +24,12 @@ public class MqttProtocolUtil {
     public static MqttConnAckMessage connAckMessage(MqttConnectReturnCode code, boolean sessionPresent) {
         return (MqttConnAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                new MqttConnAckVariableHeader(code, sessionPresent), null);
+                new MqttConnAckVariableHeader(code, sessionPresent),
+                null);
     }
 
     public static MqttConnectReturnCode connectReturnCodeForException(Throwable cause) {
-        MqttConnectReturnCode code = MqttConnectReturnCode.CONNECTION_REFUSED_SERVER_UNAVAILABLE;
+        MqttConnectReturnCode code;
         if (cause instanceof MqttUnacceptableProtocolVersionException) {
             // 不支持的协议版本
             code = MqttConnectReturnCode.CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION;
@@ -59,46 +60,44 @@ public class MqttProtocolUtil {
         }
     }
 
-    public static List<MqttTopicSubscription> getSubscribeTopics(SubscribeMessage[] sbs) {
-        if (sbs != null) {
+    public static List<MqttTopicSubscription> getTopicSubscriptions(SubscribeMessage[] sms) {
+        if (sms != null && sms.length > 0) {
             List<MqttTopicSubscription> list = new LinkedList<>();
-            for (SubscribeMessage sb : sbs) {
-                MqttTopicSubscription mqttTopicSubscription = new MqttTopicSubscription(sb.getTopic(),
-                        MqttQoS.valueOf(sb.getQos()));
-                list.add(mqttTopicSubscription);
+            for (SubscribeMessage sm : sms) {
+                list.add(new MqttTopicSubscription(sm.getTopic(), MqttQoS.valueOf(sm.getQos())));
             }
             return list;
-        } else {
-            return null;
         }
+        return null;
     }
 
     public static MqttSubscribeMessage subscribeMessage(int messageId, String... topics) {
         List<SubscribeMessage> list = new ArrayList<>();
-        for (String s : topics) {
+        for (String topic : topics) {
             SubscribeMessage sb = new SubscribeMessage();
-            sb.setTopic(s);
+            sb.setTopic(topic);
             list.add(sb);
         }
         return subscribeMessage(messageId, list.toArray(new SubscribeMessage[0]));
     }
 
     public static MqttSubscribeMessage subscribeMessage(int messageId, SubscribeMessage... msg) {
-        return subscribeMessage(messageId, getSubscribeTopics(msg));
+        return subscribeMessage(messageId, getTopicSubscriptions(msg));
     }
 
     public static MqttSubscribeMessage subscribeMessage(int messageId, List<MqttTopicSubscription> mqttTopicSubscriptions) {
-        MqttSubscribePayload mqttSubscribePayload = new MqttSubscribePayload(mqttTopicSubscriptions);
         MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.SUBSCRIBE, false, MqttQoS.AT_LEAST_ONCE,
                 false, 0);
         MqttMessageIdVariableHeader mqttMessageIdVariableHeader = MqttMessageIdVariableHeader.from(messageId);
+        MqttSubscribePayload mqttSubscribePayload = new MqttSubscribePayload(mqttTopicSubscriptions);
         return new MqttSubscribeMessage(mqttFixedHeader, mqttMessageIdVariableHeader, mqttSubscribePayload);
     }
 
     public static MqttSubAckMessage subAckMessage(int messageId, List<Integer> mqttQoSList) {
         return (MqttSubAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.SUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(messageId), new MqttSubAckPayload(mqttQoSList));
+                MqttMessageIdVariableHeader.from(messageId),
+                new MqttSubAckPayload(mqttQoSList));
     }
 
     public static MqttUnsubscribeMessage unsubscribeMessage(int messageId, List<String> topic) {
@@ -112,62 +111,65 @@ public class MqttProtocolUtil {
     public static MqttUnsubAckMessage unsubAckMessage(int messageId) {
         return (MqttUnsubAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.UNSUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(messageId), null);
+                MqttMessageIdVariableHeader.from(messageId),
+                null);
     }
 
     public static MqttMessage pingReqMessage() {
         return MqttMessageFactory.newMessage(
-                new MqttFixedHeader(MqttMessageType.PINGREQ, false, MqttQoS.AT_MOST_ONCE, false, 0), null, null);
+                new MqttFixedHeader(MqttMessageType.PINGREQ, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                null,
+                null);
     }
 
     public static MqttMessage pingRespMessage() {
         return MqttMessageFactory.newMessage(
-                new MqttFixedHeader(MqttMessageType.PINGRESP, false, MqttQoS.AT_MOST_ONCE, false, 0), null, null);
+                new MqttFixedHeader(MqttMessageType.PINGRESP, false, MqttQoS.AT_MOST_ONCE, false, 0),
+                null,
+                null);
     }
 
     public static MqttPublishMessage publishMessage(MessageData mqttMessage) {
-        return publishMessage(mqttMessage.getTopic(), mqttMessage.isDup(), mqttMessage.getQos(),
-                mqttMessage.isRetained(), mqttMessage.getMessageId(), mqttMessage.getPayload());
+        return publishMessage(mqttMessage.getTopic(), mqttMessage.getPayload(), mqttMessage.getQos(),
+                mqttMessage.isRetained(), mqttMessage.getMessageId(), mqttMessage.isDup());
     }
 
-    public static MqttPublishMessage publishMessage(String topic, byte[] payload, int qosValue, int messageId,
-                                                    boolean isRetain) {
-        return publishMessage(topic, false, qosValue, isRetain, messageId, payload);
+    public static MqttPublishMessage publishMessage(String topic, byte[] payload, int qosValue, int messageId, boolean isRetain) {
+        return publishMessage(topic, payload, qosValue, isRetain, messageId, false);
     }
 
-    public static MqttPublishMessage publishMessage(String topic, byte[] payload, int qosValue, boolean isRetain,
-                                                    int messageId, boolean isDup) {
-        return publishMessage(topic, isDup, qosValue, isRetain, messageId, payload);
-    }
-
-    public static MqttPublishMessage publishMessage(String topicName, boolean isDup, int qosValue, boolean isRetain,
-                                                    int messageId, byte[] payload) {
+    public static MqttPublishMessage publishMessage(String topic, byte[] payload, int qosValue, boolean isRetain, int messageId, boolean isDup) {
         return (MqttPublishMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBLISH, isDup, MqttQoS.valueOf(qosValue), isRetain, 0),
-                new MqttPublishVariableHeader(topicName, messageId), Unpooled.buffer().writeBytes(payload));
+                new MqttPublishVariableHeader(topic, messageId),
+                Unpooled.buffer().writeBytes(payload));
     }
 
     public static MqttMessage pubCompMessage(int messageId) {
         return MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBCOMP, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(messageId), null);
+                MqttMessageIdVariableHeader.from(messageId),
+                null);
     }
 
     public static MqttPubAckMessage pubAckMessage(int messageId) {
         return (MqttPubAckMessage) MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(messageId), null);
+                MqttMessageIdVariableHeader.from(messageId),
+                null);
     }
 
     public static MqttMessage pubRecMessage(int messageId) {
         return MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBREC, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(messageId), null);
+                MqttMessageIdVariableHeader.from(messageId),
+                null);
     }
 
     public static MqttMessage pubRelMessage(int messageId, boolean isDup) {
         return MqttMessageFactory.newMessage(
                 new MqttFixedHeader(MqttMessageType.PUBREL, isDup, MqttQoS.AT_LEAST_ONCE, false, 0),
-                MqttMessageIdVariableHeader.from(messageId), null);
+                MqttMessageIdVariableHeader.from(messageId),
+                null);
     }
 }

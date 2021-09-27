@@ -39,15 +39,15 @@ public class UnsubscribeProcessor extends AsyncTask<String> {
         int id = 0;
         String s;
         try {
-            id = MqttMessageId.get();
+            id = MessageIdFactory.get();
 
             msgId = id;
 
-            MqttUnsubscribeMessage msg = MqttProtocolUtil.unsubscribeMessage(id, Arrays.asList(topics));
+            MqttUnsubscribeMessage msg = ProtocolUtils.unsubscribeMessage(id, Arrays.asList(topics));
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {
-            MqttMessageId.release(id);
+            MessageIdFactory.release(id);
         }
         return s;
     }

@@ -2,7 +2,7 @@
 
 ## 关于
 
-基于netty实现的mqtt客户端，可用于Java、Android环境
+基于netty实现的mqtt客户端，可用于Java、Android环境。持续开发中，现已完成基本框架及功能，目前仅支持qos1级别通讯，后期根据需要开发qos2级别。
 
 ## 如何使用
 

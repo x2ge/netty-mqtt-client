@@ -35,7 +35,7 @@ public class ConnectProcessor extends AsyncTask<String> {
     }
 
     public String connect(Channel channel, MqttConnectOptions options, long timeout) throws Exception {
-        channel.writeAndFlush(MqttProtocolUtil.connectMessage(options));
+        channel.writeAndFlush(ProtocolUtils.connectMessage(options));
         return execute().get(timeout, TimeUnit.MILLISECONDS);
     }
 
