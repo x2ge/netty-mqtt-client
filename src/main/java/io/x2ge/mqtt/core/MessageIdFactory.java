@@ -2,7 +2,7 @@ package io.x2ge.mqtt.core;
 
 import java.util.Hashtable;
 
-public class MqttMessageId {
+public class MessageIdFactory {
 
     private static final Hashtable<Integer, Integer> using = new Hashtable<>();
 

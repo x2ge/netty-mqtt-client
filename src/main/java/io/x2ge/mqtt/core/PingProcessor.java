@@ -71,7 +71,7 @@ public class PingProcessor extends AsyncTask<String> {
     }
 
     public void ping(Channel channel) throws Exception {
-        channel.writeAndFlush(MqttProtocolUtil.pingReqMessage());
+        channel.writeAndFlush(ProtocolUtils.pingReqMessage());
     }
 
     public void processAck(Channel channel, MqttMessage msg) {

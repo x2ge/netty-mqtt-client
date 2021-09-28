@@ -39,11 +39,11 @@ public class PublishProcessor extends AsyncTask<String> {
         int id = 0;
         String s;
         try {
-            id = MqttMessageId.get();
+            id = MessageIdFactory.get();
 
             msgId = id;
 
-            MqttPublishMessage msg = MqttProtocolUtil.publishMessage(topic,
+            MqttPublishMessage msg = ProtocolUtils.publishMessage(topic,
                     content.getBytes(StandardCharsets.UTF_8),
                     1,
                     id,
@@ -52,7 +52,7 @@ public class PublishProcessor extends AsyncTask<String> {
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {
-            MqttMessageId.release(id);
+            MessageIdFactory.release(id);
         }
         return s;
     }

@@ -324,7 +324,7 @@ public class MqttClient {
 
     public void disConnect() throws Exception {
         if (channel != null) {
-            channel.writeAndFlush(MqttProtocolUtil.disConnectMessage());
+            channel.writeAndFlush(ProtocolUtils.disConnectMessage());
         }
     }
 

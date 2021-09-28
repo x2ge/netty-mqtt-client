@@ -38,15 +38,15 @@ public class SubscribeProcessor extends AsyncTask<String> {
         int id = 0;
         String s;
         try {
-            id = MqttMessageId.get();
+            id = MessageIdFactory.get();
 
             msgId = id;
 
-            MqttSubscribeMessage msg = MqttProtocolUtil.subscribeMessage(id, topics);
+            MqttSubscribeMessage msg = ProtocolUtils.subscribeMessage(id, topics);
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {
-            MqttMessageId.release(id);
+            MessageIdFactory.release(id);
         }
         return s;
     }
