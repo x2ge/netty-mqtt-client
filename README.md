@@ -40,10 +40,16 @@
         public void onConnected() {
             // test
             try {
-                mqttClient.subscribe("netty_mqtt_c1");
-                mqttClient.subscribe("testtopic/#");
-                mqttClient.publish("netty_mqtt_c1", "hello, netty mqtt!");
-                mqttClient.unsubscribe("netty_mqtt_c1");
+                // 订阅主题
+                mqttClient.subscribe("testtopic");
+                // 订阅主题 topic 中可使用 /# ，表示模糊匹配该主题
+                // 示例：订阅主题 parenttopic/# ，可接收 parenttopic、
+                // parenttopic/c1、parenttopic/c2等主题下消息
+                mqttClient.subscribe("parenttopic/#");
+                // 发布一个消息到主题parenttopic/c2
+                mqttClient.publish("parenttopic/c2", "hello, netty mqtt!");
+                // 取消订阅
+                mqttClient.unsubscribe("testtopic");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -72,15 +78,21 @@
 
 #### 订阅
 
-    mqttClient.subscribe("netty_mqtt_c1");
+    // 订阅主题
+    mqttClient.subscribe("testtopic");
+    // 订阅主题 topic 中可使用 /# ，表示模糊匹配该主题
+    // 示例：订阅主题 parenttopic/# ，可接收 parenttopic、
+    // parenttopic/c1、parenttopic/c2等主题下消息
+    mqttClient.subscribe("parenttopic/#");
 
 #### 取消订阅
 
-    mqttClient.unsubscribe("netty_mqtt_c1");
+    mqttClient.unsubscribe("testtopic");
 
 #### 发布消息
 
-    mqttClient.publish("netty_mqtt_c1", "hello, netty mqtt!");
+    // 发布一个消息到主题parenttopic/c2
+    mqttClient.publish("parenttopic/c2", "hello, netty mqtt!");
 
 #### 关闭连接
 
