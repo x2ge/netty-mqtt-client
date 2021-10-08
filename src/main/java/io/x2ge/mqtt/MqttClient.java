@@ -245,15 +245,21 @@ public class MqttClient {
     }
 
 
-    private void startPingTask(Channel channel, int keepAliveTime) {
+    private void startPingTask() {
+        if (channel == null)
+            return;
+
         if (pingProcessor == null
                 || pingProcessor.isCancelled()
                 || pingProcessor.isDone())
             pingProcessor = new PingProcessor();
-        pingProcessor.start(channel, keepAliveTime, new PingCallback());
+        pingProcessor.start(channel, connectOptions.getKeepAliveTime(), new PingCallback());
     }
 
     public void subscribe(String... topics) throws Exception {
+        if (channel == null)
+            return;
+
         SubscribeProcessor sp = new SubscribeProcessor();
         subscribeProcessorList.add(sp);
         try {
@@ -277,6 +283,9 @@ public class MqttClient {
     }
 
     public void unsubscribe(String... topics) throws Exception {
+        if (channel == null)
+            return;
+
         UnsubscribeProcessor usp = new UnsubscribeProcessor();
         unsubscribeProcessorList.add(usp);
         try {
@@ -300,6 +309,9 @@ public class MqttClient {
     }
 
     public void publish(String topic, String content) throws Exception {
+        if (channel == null)
+            return;
+
         PublishProcessor pp = new PublishProcessor();
         publishProcessorList.add(pp);
         try {
@@ -323,9 +335,10 @@ public class MqttClient {
     }
 
     public void disConnect() throws Exception {
-        if (channel != null) {
-            channel.writeAndFlush(ProtocolUtils.disConnectMessage());
-        }
+        if (channel == null)
+            return;
+
+        channel.writeAndFlush(ProtocolUtils.disConnectMessage());
     }
 
     public void close() {
@@ -395,7 +408,7 @@ public class MqttClient {
     private void onConnected() {
         setConnected(true);
         setClosed(false);
-        startPingTask(channel, connectOptions.getKeepAliveTime());
+        startPingTask();
         if (callback != null)
             callback.onConnected();
     }
