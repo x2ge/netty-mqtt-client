@@ -5,6 +5,7 @@ import io.netty.handler.codec.mqtt.MqttMessageIdAndPropertiesVariableHeader;
 import io.netty.handler.codec.mqtt.MqttUnsubAckMessage;
 import io.netty.handler.codec.mqtt.MqttUnsubscribeMessage;
 import io.x2ge.mqtt.utils.AsyncTask;
+import io.x2ge.mqtt.utils.Log;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,7 @@ public class UnsubscribeProcessor extends AsyncTask<String> {
             msgId = id;
 
             MqttUnsubscribeMessage msg = ProtocolUtils.unsubscribeMessage(id, Arrays.asList(topics));
+            Log.i("-->发起取消订阅：" + msg);
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {

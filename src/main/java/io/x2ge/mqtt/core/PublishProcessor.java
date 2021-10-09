@@ -5,6 +5,7 @@ import io.netty.handler.codec.mqtt.MqttMessageIdVariableHeader;
 import io.netty.handler.codec.mqtt.MqttPubAckMessage;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.x2ge.mqtt.utils.AsyncTask;
+import io.x2ge.mqtt.utils.Log;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +50,7 @@ public class PublishProcessor extends AsyncTask<String> {
                     id,
                     false
             );
+            Log.i("-->发送消息：" + msg);
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {

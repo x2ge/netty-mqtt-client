@@ -4,18 +4,29 @@ import io.x2ge.mqtt.MqttClient;
 import io.x2ge.mqtt.MqttConnectOptions;
 import io.x2ge.mqtt.utils.Log;
 
-import java.nio.charset.StandardCharsets;
-
 public class App {
 
     public static void main(String[] args) {
+        Log.enablePing(true);
         MqttClient mqttClient = new MqttClient();
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setHost("localhost");
+
+        // emqx
+        options.setHost("broker-cn.emqx.io");
         options.setPort(1883);
+
+        // apollo
+//        options.setHost("localhost");
+//        options.setPort(61613);
+//        options.setUserName("admin");
+//        options.setPassword("password".getBytes(StandardCharsets.UTF_8));
+
+        // anoah
+//        options.setHost("localhost");
+//        options.setPort(30380);
+//        options.setUserName("anoah");
+//        options.setPassword("uclass2019".getBytes(StandardCharsets.UTF_8));
         options.setClientIdentifier("netty_mqtt_c1");
-        options.setUserName("testuser");
-        options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
         options.setKeepAliveTime(5);
         options.setCleanSession(true);
         // 配置动作超时时间
@@ -29,15 +40,16 @@ public class App {
                 // test
                 try {
                     // 订阅主题
-                    mqttClient.subscribe("testtopic");
+                    mqttClient.subscribe(1, "topic111");
+                    mqttClient.publish("topic111", "hello, netty mqtt!");
                     // 订阅主题 topic 中可使用 /# ，表示模糊匹配该主题
-                    // 示例：订阅主题 parenttopic/# ，可接收 parenttopic、
-                    // parenttopic/c1、parenttopic/c2等主题下消息
-                    mqttClient.subscribe("parenttopic/#");
-                    // 发布一个消息到主题parenttopic/c2
-                    mqttClient.publish("parenttopic/c2", "hello, netty mqtt!");
+                    // 示例：订阅主题 topic1/# ，可接收 topic1、
+                    // topic1/aaa、topic1/bbb等主题下消息
+//                    mqttClient.subscribe("topic1/#");
+                    // 发布一个消息到主题topic1/aaa
+//                    mqttClient.publish("topic1/aaa", "hello, netty mqtt!-2-");
                     // 取消订阅
-                    mqttClient.unsubscribe("testtopic");
+                    mqttClient.unsubscribe("topic111");
 //                    mqttClient.close();
                 } catch (Exception e) {
                     e.printStackTrace();

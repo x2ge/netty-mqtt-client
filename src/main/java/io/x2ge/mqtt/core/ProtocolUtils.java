@@ -48,10 +48,10 @@ public class ProtocolUtils {
         return new MqttMessage(mqttFixedHeader);
     }
 
-    public static List<String> getTopics(SubscribeMessage[] sMsgObj) {
-        if (sMsgObj != null) {
+    public static List<String> getTopics(SubscriptionTopic[] subscriptionTopics) {
+        if (subscriptionTopics != null) {
             List<String> topics = new LinkedList<>();
-            for (SubscribeMessage sb : sMsgObj) {
+            for (SubscriptionTopic sb : subscriptionTopics) {
                 topics.add(sb.getTopic());
             }
             return topics;
@@ -60,10 +60,10 @@ public class ProtocolUtils {
         }
     }
 
-    public static List<MqttTopicSubscription> getTopicSubscriptions(SubscribeMessage[] sms) {
-        if (sms != null && sms.length > 0) {
+    public static List<MqttTopicSubscription> getTopicSubscriptions(SubscriptionTopic[] subscriptionTopics) {
+        if (subscriptionTopics != null && subscriptionTopics.length > 0) {
             List<MqttTopicSubscription> list = new LinkedList<>();
-            for (SubscribeMessage sm : sms) {
+            for (SubscriptionTopic sm : subscriptionTopics) {
                 list.add(new MqttTopicSubscription(sm.getTopic(), MqttQoS.valueOf(sm.getQos())));
             }
             return list;
@@ -72,17 +72,22 @@ public class ProtocolUtils {
     }
 
     public static MqttSubscribeMessage subscribeMessage(int messageId, String... topics) {
-        List<SubscribeMessage> list = new ArrayList<>();
+        return subscribeMessage(messageId, 0, topics);
+    }
+
+    public static MqttSubscribeMessage subscribeMessage(int messageId, int qos, String... topics) {
+        List<SubscriptionTopic> list = new ArrayList<>();
         for (String topic : topics) {
-            SubscribeMessage sb = new SubscribeMessage();
+            SubscriptionTopic sb = new SubscriptionTopic();
+            sb.setQos(qos);
             sb.setTopic(topic);
             list.add(sb);
         }
-        return subscribeMessage(messageId, list.toArray(new SubscribeMessage[0]));
+        return subscribeMessage(messageId, list.toArray(new SubscriptionTopic[0]));
     }
 
-    public static MqttSubscribeMessage subscribeMessage(int messageId, SubscribeMessage... msg) {
-        return subscribeMessage(messageId, getTopicSubscriptions(msg));
+    public static MqttSubscribeMessage subscribeMessage(int messageId, SubscriptionTopic... subscriptionTopics) {
+        return subscribeMessage(messageId, getTopicSubscriptions(subscriptionTopics));
     }
 
     public static MqttSubscribeMessage subscribeMessage(int messageId, List<MqttTopicSubscription> mqttTopicSubscriptions) {
@@ -100,11 +105,11 @@ public class ProtocolUtils {
                 new MqttSubAckPayload(mqttQoSList));
     }
 
-    public static MqttUnsubscribeMessage unsubscribeMessage(int messageId, List<String> topic) {
+    public static MqttUnsubscribeMessage unsubscribeMessage(int messageId, List<String> topicList) {
         MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.UNSUBSCRIBE, false, MqttQoS.AT_MOST_ONCE,
                 false, 0x02);
         MqttMessageIdVariableHeader variableHeader = MqttMessageIdVariableHeader.from(messageId);
-        MqttUnsubscribePayload mqttUnsubscribeMessage = new MqttUnsubscribePayload(topic);
+        MqttUnsubscribePayload mqttUnsubscribeMessage = new MqttUnsubscribePayload(topicList);
         return new MqttUnsubscribeMessage(mqttFixedHeader, variableHeader, mqttUnsubscribeMessage);
     }
 

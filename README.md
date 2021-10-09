@@ -13,7 +13,7 @@
     }
     
     dependencies {
-        implementation 'io.github.x2ge:netty-mqtt-client:2.0.2'
+        implementation 'io.github.x2ge:netty-mqtt-client:2.0.3'
     }
 
 #### 连接
@@ -41,15 +41,15 @@
             // test
             try {
                 // 订阅主题
-                mqttClient.subscribe("testtopic");
+                mqttClient.subscribe("topic");
                 // 订阅主题 topic 中可使用 /# ，表示模糊匹配该主题
-                // 示例：订阅主题 parenttopic/# ，可接收 parenttopic、
-                // parenttopic/c1、parenttopic/c2等主题下消息
-                mqttClient.subscribe("parenttopic/#");
-                // 发布一个消息到主题parenttopic/c2
-                mqttClient.publish("parenttopic/c2", "hello, netty mqtt!");
+                // 示例：订阅主题 topic1/# ，可接收 topic1、
+                // topic1/aaa、topic1/bbb等主题下消息
+                mqttClient.subscribe("topic1/#");
+                // 发布一个消息到主题topic1/aaa
+                mqttClient.publish("topic1/aaa", "hello, netty mqtt!");
                 // 取消订阅
-                mqttClient.unsubscribe("testtopic");
+                mqttClient.unsubscribe("topic");
             } catch (Exception e) {
                 e.printStackTrace();
             }

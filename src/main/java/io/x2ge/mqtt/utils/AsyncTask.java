@@ -8,10 +8,6 @@ public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
 
     private FutureTask<T> futureTask;
 
-    private Callback callback;
-
-    private boolean hasExecuted = false;
-
     public AsyncTask() {
         this.futureTask = new FutureTask<T>(this) {
             @Override
@@ -54,8 +50,11 @@ public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
         futureTask.run();
     }
 
-    public final AsyncTask<T> execute() {
-        setHasExecuted(true);
+    protected void done() {
+
+    }
+
+    public AsyncTask<T> execute() {
         try {
             sDefaultExecutor.execute(this);
         } catch (Exception e) {
@@ -64,29 +63,18 @@ public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
         return this;
     }
 
-    public final AsyncTask<T> executeOnExecutor(Executor exec) {
-        setHasExecuted(true);
+    public AsyncTask<T> executeOnExecutor(Executor executor) {
         try {
-            exec.execute(this);
+            executor.execute(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return this;
     }
 
-    public boolean isHasExecuted() {
-        return hasExecuted;
-    }
+    private Callback callback;
 
-    public void setHasExecuted(boolean hasExecuted) {
-        this.hasExecuted = hasExecuted;
-    }
-
-    protected void done() {
-
-    }
-
-    AsyncTask<T> setCallback(Callback callback) {
+    public AsyncTask<T> setCallback(Callback callback) {
         this.callback = callback;
         return this;
     }
