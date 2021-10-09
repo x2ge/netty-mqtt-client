@@ -3,6 +3,7 @@ package io.x2ge.mqtt.core;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.x2ge.mqtt.utils.AsyncTask;
+import io.x2ge.mqtt.utils.Log;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -71,7 +72,9 @@ public class PingProcessor extends AsyncTask<String> {
     }
 
     public void ping(Channel channel) throws Exception {
-        channel.writeAndFlush(ProtocolUtils.pingReqMessage());
+        MqttMessage msg = ProtocolUtils.pingReqMessage();
+        Log.i("[ping]-->发起ping：" + msg);
+        channel.writeAndFlush(msg);
     }
 
     public void processAck(Channel channel, MqttMessage msg) {

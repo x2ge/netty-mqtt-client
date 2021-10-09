@@ -3,8 +3,10 @@ package io.x2ge.mqtt.core;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttConnAckMessage;
 import io.netty.handler.codec.mqtt.MqttConnAckVariableHeader;
+import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.x2ge.mqtt.MqttConnectOptions;
 import io.x2ge.mqtt.utils.AsyncTask;
+import io.x2ge.mqtt.utils.Log;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +37,9 @@ public class ConnectProcessor extends AsyncTask<String> {
     }
 
     public String connect(Channel channel, MqttConnectOptions options, long timeout) throws Exception {
-        channel.writeAndFlush(ProtocolUtils.connectMessage(options));
+        MqttConnectMessage msg = ProtocolUtils.connectMessage(options);
+        Log.i("-->发起连接：" + msg);
+        channel.writeAndFlush(msg);
         return execute().get(timeout, TimeUnit.MILLISECONDS);
     }
 

@@ -9,7 +9,24 @@ public class Log {
 
     static SimpleDateFormat f = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
+    private static boolean isEnable = true;
+    private static boolean isEnablePing = false;
+
+    public static void enable(boolean b) {
+        isEnable = b;
+    }
+
+    public static void enablePing(boolean b) {
+        isEnablePing = b;
+    }
+
     public static void i(String msg) {
+        if (!isEnable)
+            return;
+
+        if (!isEnablePing && msg.contains("[ping]"))
+            return;
+
         System.out.println(f.format(new Date()) + " " + getPid() + "-" + Thread.currentThread().getId() + " I/" +
                 format(msg, 3));
     }
@@ -24,7 +41,8 @@ public class Log {
 
         int depth = Math.min(stackTrace.length - 1, stackTraceIndex);
         StackTraceElement ele = stackTrace[depth];
-        return String.format(Locale.getDefault(), "%s.%s(%s:%d): \n%s", className, methodName, fileName, lineNumber, message);
+        return String.format(Locale.getDefault(), "%s.%s(%s:%d): \n%s" + (message.length() > 0 ? "\n" : ""),
+                className, methodName, fileName, lineNumber, message);
 //            return String.format(Locale.getDefault(), "(%d.%d):%s", Process.myPid(), Process.myTid(), message);
     }
 

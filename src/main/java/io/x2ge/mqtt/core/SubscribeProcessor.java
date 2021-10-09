@@ -5,6 +5,7 @@ import io.netty.handler.codec.mqtt.MqttMessageIdAndPropertiesVariableHeader;
 import io.netty.handler.codec.mqtt.MqttSubAckMessage;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import io.x2ge.mqtt.utils.AsyncTask;
+import io.x2ge.mqtt.utils.Log;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,6 +48,7 @@ public class SubscribeProcessor extends AsyncTask<String> {
             msgId = id;
 
             MqttSubscribeMessage msg = ProtocolUtils.subscribeMessage(id, qos, topics);
+            Log.i("-->发起订阅：" + msg);
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {

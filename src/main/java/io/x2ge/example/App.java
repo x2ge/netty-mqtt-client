@@ -7,6 +7,7 @@ import io.x2ge.mqtt.utils.Log;
 public class App {
 
     public static void main(String[] args) {
+        Log.enablePing(true);
         MqttClient mqttClient = new MqttClient();
         MqttConnectOptions options = new MqttConnectOptions();
 
@@ -39,8 +40,8 @@ public class App {
                 // test
                 try {
                     // 订阅主题
-                    mqttClient.subscribe(1, "topic123");
-                    mqttClient.publish("topic123", "hello, netty mqtt!");
+                    mqttClient.subscribe(1, "topic111");
+                    mqttClient.publish("topic111", "hello, netty mqtt!");
                     // 订阅主题 topic 中可使用 /# ，表示模糊匹配该主题
                     // 示例：订阅主题 topic1/# ，可接收 topic1、
                     // topic1/aaa、topic1/bbb等主题下消息
@@ -48,7 +49,7 @@ public class App {
                     // 发布一个消息到主题topic1/aaa
 //                    mqttClient.publish("topic1/aaa", "hello, netty mqtt!-2-");
                     // 取消订阅
-                    mqttClient.unsubscribe("topic");
+                    mqttClient.unsubscribe("topic111");
 //                    mqttClient.close();
                 } catch (Exception e) {
                     e.printStackTrace();

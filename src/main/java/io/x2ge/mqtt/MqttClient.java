@@ -351,7 +351,9 @@ public class MqttClient {
         if (channel == null)
             return;
 
-        channel.writeAndFlush(ProtocolUtils.disConnectMessage());
+        MqttMessage msg = ProtocolUtils.disConnectMessage();
+        Log.i("-->发起断开连接：" + msg);
+        channel.writeAndFlush(msg);
     }
 
     public void close() {
@@ -497,8 +499,10 @@ public class MqttClient {
 
             MqttMessage msg = (MqttMessage) msgx;
             MqttFixedHeader mqttFixedHeader = msg.fixedHeader();
-            if (mqttFixedHeader.messageType() != MqttMessageType.PINGRESP) {
-                Log.i("--channelRead0-->" + msgx);
+            if (mqttFixedHeader.messageType() == MqttMessageType.PINGRESP) {
+                Log.i("[ping]-->channelRead0 : " + msgx);
+            } else {
+                Log.i("-->channelRead0 : " + msgx);
             }
             switch (mqttFixedHeader.messageType()) {
                 case CONNACK:
@@ -532,6 +536,7 @@ public class MqttClient {
                         // qos为1、2级别的消息需要发送回执
                         // 注：需要完成数据的完全读取后才能发送回执
                         MqttPubAckMessage mqttPubAckMessage = ProtocolUtils.pubAckMessage(mqttPublishVariableHeader.messageId());
+                        Log.i("-->发送消息回执：" + mqttPubAckMessage);
                         ctx.channel().writeAndFlush(mqttPubAckMessage);
                     }
                     break;
