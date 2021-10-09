@@ -257,13 +257,26 @@ public class MqttClient {
     }
 
     public void subscribe(String... topics) throws Exception {
+        subscribe(0, topics);
+    }
+
+    /**
+     * 订阅主题
+     *
+     * @param qos    0-至多发1次
+     *               1-至少送达1次
+     *               2-完全送达并回应
+     * @param topics 主题集
+     * @throws Exception 失败异常
+     */
+    public void subscribe(int qos, String... topics) throws Exception {
         if (channel == null)
             return;
 
         SubscribeProcessor sp = new SubscribeProcessor();
         subscribeProcessorList.add(sp);
         try {
-            String result = sp.subscribe(channel, topics, actionTimeout);
+            String result = sp.subscribe(channel, qos, topics, actionTimeout);
             if (ProcessorResult.RESULT_SUCCESS.equals(result)) {
                 Log.i("-->订阅成功：" + Arrays.toString(topics));
             } else {
@@ -481,10 +494,12 @@ public class MqttClient {
             if (msgx == null) {
                 return;
             }
-            Log.i("--channelRead0-->" + msgx);
 
             MqttMessage msg = (MqttMessage) msgx;
             MqttFixedHeader mqttFixedHeader = msg.fixedHeader();
+            if (mqttFixedHeader.messageType() != MqttMessageType.PINGRESP) {
+                Log.i("--channelRead0-->" + msgx);
+            }
             switch (mqttFixedHeader.messageType()) {
                 case CONNACK:
                     if (connectProcessor != null)
@@ -509,8 +524,16 @@ public class MqttClient {
                     MqttPublishVariableHeader mqttPublishVariableHeader = publishMessage.variableHeader();
                     String topicName = mqttPublishVariableHeader.topicName();
                     ByteBuf payload = publishMessage.payload();
+                    String content = payload.toString(StandardCharsets.UTF_8);
+                    onMessageArrived(topicName, content);
 
-                    onMessageArrived(topicName, payload.toString(StandardCharsets.UTF_8));
+                    if (mqttFixedHeader.qosLevel() == MqttQoS.AT_LEAST_ONCE
+                            || mqttFixedHeader.qosLevel() == MqttQoS.EXACTLY_ONCE) {
+                        // qos为1、2级别的消息需要发送回执
+                        // 注：需要完成数据的完全读取后才能发送回执
+                        MqttPubAckMessage mqttPubAckMessage = ProtocolUtils.pubAckMessage(mqttPublishVariableHeader.messageId());
+                        ctx.channel().writeAndFlush(mqttPubAckMessage);
+                    }
                     break;
                 case PUBACK:
                     // qos = 1的发布才有该响应

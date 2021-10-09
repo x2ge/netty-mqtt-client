@@ -1,6 +1,6 @@
 package io.x2ge.mqtt.core;
 
-public class SubscribeMessage {
+public class SubscriptionTopic {
     private String topic;
     private int qos;
 

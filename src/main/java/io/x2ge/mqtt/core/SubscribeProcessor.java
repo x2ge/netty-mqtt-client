@@ -35,6 +35,10 @@ public class SubscribeProcessor extends AsyncTask<String> {
     }
 
     public String subscribe(Channel channel, String[] topics, long timeout) throws Exception {
+        return subscribe(channel, 0, topics, timeout);
+    }
+
+    public String subscribe(Channel channel, int qos, String[] topics, long timeout) throws Exception {
         int id = 0;
         String s;
         try {
@@ -42,7 +46,7 @@ public class SubscribeProcessor extends AsyncTask<String> {
 
             msgId = id;
 
-            MqttSubscribeMessage msg = ProtocolUtils.subscribeMessage(id, topics);
+            MqttSubscribeMessage msg = ProtocolUtils.subscribeMessage(id, qos, topics);
             channel.writeAndFlush(msg);
             s = execute().get(timeout, TimeUnit.MILLISECONDS);
         } finally {
