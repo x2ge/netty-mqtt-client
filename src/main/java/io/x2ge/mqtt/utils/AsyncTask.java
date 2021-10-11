@@ -37,12 +37,24 @@ public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
 
     @Override
     public T get() throws InterruptedException, ExecutionException {
-        return futureTask.get();
+        try {
+            return futureTask.get();
+        } catch (Exception e) {
+            // 发生异常，尝试停止任务
+            cancel(true);
+            throw e;
+        }
     }
 
     @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return futureTask.get(timeout, unit);
+        try {
+            return futureTask.get(timeout, unit);
+        } catch (Exception e) {
+            // 发生异常，尝试停止任务
+            cancel(true);
+            throw e;
+        }
     }
 
     @Override
