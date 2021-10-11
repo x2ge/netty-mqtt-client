@@ -20,12 +20,11 @@ public class ConnectProcessor extends AsyncTask<String> {
     @Override
     public String call() throws Exception {
         while (!isCancelled() && !receivedAck.get()) {
-
-            if (e != null) {
-                throw e;
-            }
-
             synchronized (receivedAck) {
+                if (e != null) {
+                    throw e;
+                }
+
                 try {
                     receivedAck.wait(300L);
                 } catch (Exception ex) {

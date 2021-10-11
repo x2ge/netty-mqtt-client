@@ -93,6 +93,7 @@ public class MqttClient {
     }
 
     private void doConnect(MqttConnectOptions options, long timeout) throws Exception {
+        // 创建长连接
         EventLoopGroup group = new NioEventLoopGroup();
         connectTask = new AsyncTask<String>() {
             @Override
@@ -127,8 +128,10 @@ public class MqttClient {
         if (channel == null)
             return;
 
+        // 发送mqtt协议连接报文
         doConnect0(channel, options, timeout);
 
+        // 等待连接关闭的任务
         connectTask = new AsyncTask<String>() {
             @Override
             public String call() throws Exception {
