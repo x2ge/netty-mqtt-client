@@ -561,6 +561,7 @@ public class MqttClient {
                     // qos = 2的发布才参与
                     break;
                 case PINGRESP:
+                    // 心跳请求响应
                     if (pingProcessor != null) {
                         pingProcessor.processAck(ctx.channel(), msg);
                     }
