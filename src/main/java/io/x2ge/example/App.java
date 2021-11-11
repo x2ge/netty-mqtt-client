@@ -32,7 +32,7 @@ public class App {
         // 配置动作超时时间
         mqttClient.setActionTimeout(3000);
         // 配置掉线重连
-        mqttClient.setReconnectOnLost(5, 10000);
+        mqttClient.setReconnectOnLost(1, 10000);
 
         mqttClient.setCallback(new MqttClient.Callback() {
             @Override

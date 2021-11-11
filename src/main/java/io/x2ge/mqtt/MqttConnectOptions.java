@@ -4,26 +4,39 @@ import io.netty.handler.codec.mqtt.MqttVersion;
 import io.x2ge.mqtt.utils.StringUtils;
 
 public class MqttConnectOptions {
-    private MqttVersion mqttVersion = MqttVersion.MQTT_3_1_1;
-
     private String host;
     private int port;
 
-    private String clientIdentifier = "";
-    private String userName = "";
-    private byte[] password;
-    private int keepAliveTime = 60;
-
-    private boolean isWillFlag = false;
+    // 可变报头部分
+    private MqttVersion mqttVersion = MqttVersion.MQTT_3_1_1;
     private boolean isWillRetain = false;
     private int willQos = 0;
+    private boolean isWillFlag = false;
+    private boolean isCleanSession = false;
+    private int keepAliveTime = 60;
+
+    // 有效载荷 ：客户端标识符，遗嘱主题，遗嘱消息，用户名，密码
+    private String clientIdentifier = "";
     private String willTopic = "";
     private byte[] willMessage;
+    private String userName = "";
+    private byte[] password;
 
-    private boolean isCleanSession = false;
 
-    public MqttConnectOptions() {
+    public String getHost() {
+        return host;
+    }
 
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public MqttVersion getMqttVersion() {
@@ -44,6 +57,14 @@ public class MqttConnectOptions {
 
     public void setWillRetain(boolean willRetain) {
         this.isWillRetain = willRetain;
+    }
+
+    public int getWillQos() {
+        return willQos;
+    }
+
+    public void setWillQos(int willQos) {
+        this.willQos = willQos;
     }
 
     public boolean isWillFlag() {
@@ -68,6 +89,17 @@ public class MqttConnectOptions {
         this.isCleanSession = cleanSession;
     }
 
+    public int getKeepAliveTime() {
+        return keepAliveTime;
+    }
+
+    /**
+     * @param keepAliveTime 维持连接时间，秒
+     */
+    public void setKeepAliveTime(int keepAliveTime) {
+        this.keepAliveTime = keepAliveTime;
+    }
+
     public String getClientIdentifier() {
         return clientIdentifier;
     }
@@ -84,33 +116,6 @@ public class MqttConnectOptions {
         this.willTopic = willTopic;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public int getWillQos() {
-        return willQos;
-    }
-
-    public void setWillQos(int willQos) {
-        this.willQos = willQos;
-    }
-
-    public int getKeepAliveTime() {
-        return keepAliveTime;
-    }
-
-    /**
-     * @param keepAliveTime 维持连接时间，秒
-     */
-    public void setKeepAliveTime(int keepAliveTime) {
-        this.keepAliveTime = keepAliveTime;
-    }
-
     public byte[] getWillMessage() {
         return willMessage;
     }
@@ -119,27 +124,19 @@ public class MqttConnectOptions {
         this.willMessage = willMessage;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public byte[] getPassword() {
         return password;
     }
 
     public void setPassword(byte[] password) {
         this.password = password;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 }

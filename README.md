@@ -22,9 +22,9 @@
     MqttConnectOptions options = new MqttConnectOptions();
     options.setHost("localhost");
     options.setPort(1883);
-    options.setClientIdentifier("netty_mqtt_c1");
     options.setUserName("testuser");
     options.setPassword("123456".getBytes(StandardCharsets.UTF_8));
+    options.setClientIdentifier("netty_mqtt_c1");
     options.setKeepAliveTime(10);
     options.setCleanSession(true);
     // 配置动作超时时间

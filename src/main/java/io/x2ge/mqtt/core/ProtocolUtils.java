@@ -10,21 +10,44 @@ import java.util.List;
 
 public class ProtocolUtils {
     public static MqttConnectMessage connectMessage(MqttConnectOptions options) {
-        MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.CONNECT, false, MqttQoS.AT_MOST_ONCE,
-                false, 10);
-        MqttVersion version = options.getMqttVersion();
-        MqttConnectVariableHeader mqttConnectVariableHeader = new MqttConnectVariableHeader(version.protocolName(),
-                version.protocolLevel(), options.isHasUserName(), options.isHasPassword(), options.isWillRetain(),
-                options.getWillQos(), options.isWillFlag(), options.isCleanSession(), options.getKeepAliveTime());
-        MqttConnectPayload mqttConnectPayload = new MqttConnectPayload(options.getClientIdentifier(), options.getWillTopic(),
-                options.getWillMessage(), options.getUserName(), options.getPassword());
-        return new MqttConnectMessage(mqttFixedHeader, mqttConnectVariableHeader, mqttConnectPayload);
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(
+                MqttMessageType.CONNECT,
+                false,
+                MqttQoS.AT_MOST_ONCE,
+                false,
+                10);
+        MqttConnectVariableHeader variableHeader = new MqttConnectVariableHeader(
+                options.getMqttVersion().protocolName(),
+                options.getMqttVersion().protocolLevel(),
+                options.isHasUserName(),
+                options.isHasPassword(),
+                options.isWillRetain(),
+                options.getWillQos(),
+                options.isWillFlag(),
+                options.isCleanSession(),
+                options.getKeepAliveTime());
+        MqttConnectPayload payload = new MqttConnectPayload(
+                options.getClientIdentifier(),
+                options.getWillTopic(),
+                options.getWillMessage(),
+                options.getUserName(),
+                options.getPassword());
+        return new MqttConnectMessage(fixedHeader, variableHeader, payload);
     }
 
-    public static MqttConnAckMessage connAckMessage(MqttConnectReturnCode code, boolean sessionPresent) {
+    public static MqttConnAckMessage connAckMessage(MqttConnectReturnCode returnCode, boolean sessionPresent) {
+        MqttFixedHeader fixedHeader = new MqttFixedHeader(
+                MqttMessageType.CONNACK,
+                false,
+                MqttQoS.AT_MOST_ONCE,
+                false,
+                0);
+        MqttConnAckVariableHeader variableHeader = new MqttConnAckVariableHeader(
+                returnCode,
+                sessionPresent);
         return (MqttConnAckMessage) MqttMessageFactory.newMessage(
-                new MqttFixedHeader(MqttMessageType.CONNACK, false, MqttQoS.AT_MOST_ONCE, false, 0),
-                new MqttConnAckVariableHeader(code, sessionPresent),
+                fixedHeader,
+                variableHeader,
                 null);
     }
 

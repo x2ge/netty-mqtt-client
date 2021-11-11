@@ -13,36 +13,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UnsubscribeProcessor extends AsyncTask<String> {
 
-    public int msgId;
+    private long timeout;
+    private int msgId;
     private final AtomicBoolean receivedAck = new AtomicBoolean(false);
-    private Exception e;
 
     @Override
     public String call() throws Exception {
-        while (!isCancelled() && !receivedAck.get()) {
-
-            if (e != null) {
-                throw e;
-            }
-
+        if (!isCancelled() && !receivedAck.get()) {
             synchronized (receivedAck) {
-                try {
-                    receivedAck.wait(300L);
-                } catch (Exception ex) {
-//                    ex.printStackTrace();
-                }
+                receivedAck.wait(timeout);
             }
         }
         return receivedAck.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
     public String unsubscribe(Channel channel, String[] topics, long timeout) throws Exception {
+        this.timeout = timeout;
+
         int id = 0;
         String s;
         try {
             id = MessageIdFactory.get();
 
-            msgId = id;
+            this.msgId = id;
 
             MqttUnsubscribeMessage msg = ProtocolUtils.unsubscribeMessage(id, Arrays.asList(topics));
             Log.i("-->发起取消订阅：" + msg);
