@@ -16,7 +16,6 @@ public class PingProcessor extends AsyncTask<String> {
     public Callback cb;
 
     private final AtomicBoolean receivedAck = new AtomicBoolean(false);
-    private Exception e;
 
     @Override
     public String call() throws Exception {
@@ -26,16 +25,14 @@ public class PingProcessor extends AsyncTask<String> {
 
             ping(channel);
 
-            long start = System.nanoTime();
-            while (!isCancelled()) {
-                if (receivedAck.get()) {
-                    // 已经收到ping应答，跳出内循环，延时后进行下一次ping
-                    break;
+            if (!isCancelled() && !receivedAck.get()) {
+                synchronized (receivedAck) {
+                    receivedAck.wait(TimeUnit.SECONDS.toMillis(keepAlive) / 2);
                 }
+            }
 
-                // 判断是否超时
-                long l = System.nanoTime() - start;
-                if (l > TimeUnit.SECONDS.toNanos(keepAlive) / 2) {
+            if (!isCancelled()) {
+                if (!receivedAck.get()) {
                     TimeoutException te = new TimeoutException("Did not receive a response for a long time : " + keepAlive + "s");
                     if (cb != null) {
                         cb.onConnectLost(te);
@@ -43,22 +40,7 @@ public class PingProcessor extends AsyncTask<String> {
                     throw te;
                 }
 
-                synchronized (receivedAck) {
-                    try {
-                        receivedAck.wait(300L);
-                    } catch (Exception ex) {
-//                        ex.printStackTrace();
-                    }
-                }
-            }
-
-            if (!isCancelled()) {
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(keepAlive));
-                } catch (InterruptedException ex) {
-//                    ex.printStackTrace();
-                    break;
-                }
+                Thread.sleep(TimeUnit.SECONDS.toMillis(keepAlive));
             }
         }
         return null;

@@ -14,28 +14,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ConnectProcessor extends AsyncTask<String> {
 
+    private long timeout;
     private final AtomicBoolean receivedAck = new AtomicBoolean(false);
     private Exception e;
 
     @Override
     public String call() throws Exception {
-        while (!isCancelled() && !receivedAck.get()) {
+        if (!isCancelled() && !receivedAck.get() && e == null) {
             synchronized (receivedAck) {
-                if (e != null) {
-                    throw e;
-                }
-
-                try {
-                    receivedAck.wait(300L);
-                } catch (Exception ex) {
-//                    ex.printStackTrace();
-                }
+                receivedAck.wait(timeout);
             }
         }
+
+        if (e != null) {
+            throw e;
+        }
+
         return receivedAck.get() ? ProcessorResult.RESULT_SUCCESS : ProcessorResult.RESULT_FAIL;
     }
 
     public String connect(Channel channel, MqttConnectOptions options, long timeout) throws Exception {
+        this.timeout = timeout;
+
         MqttConnectMessage msg = ProtocolUtils.connectMessage(options);
         Log.i("-->发起连接：" + msg);
         channel.writeAndFlush(msg);
