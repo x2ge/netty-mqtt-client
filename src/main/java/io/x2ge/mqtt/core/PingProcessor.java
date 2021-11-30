@@ -15,6 +15,7 @@ public class PingProcessor extends AsyncTask<String> {
     public int keepAlive = 60;
     public Callback cb;
 
+    public long lastReceivedAckTime;
     private final AtomicBoolean receivedAck = new AtomicBoolean(false);
 
     @Override
@@ -23,16 +24,22 @@ public class PingProcessor extends AsyncTask<String> {
 
             receivedAck.set(false);
 
-            ping(channel);
+            try {
+                ping();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            if (!isCancelled() && !receivedAck.get()) {
+            if (!isCancelled()) {
                 synchronized (receivedAck) {
-                    receivedAck.wait(TimeUnit.SECONDS.toMillis(keepAlive) / 2);
+                    if (!receivedAck.get()) {
+                        receivedAck.wait((TimeUnit.SECONDS.toMillis(keepAlive) / 2L));
+                    }
                 }
             }
 
             if (!isCancelled()) {
-                if (!receivedAck.get()) {
+                if (isReceivedAckExpired()) {
                     TimeoutException te = new TimeoutException("Did not receive a response for a long time : " + keepAlive + "s");
                     if (cb != null) {
                         cb.onConnectLost(te);
@@ -40,7 +47,9 @@ public class PingProcessor extends AsyncTask<String> {
                     throw te;
                 }
 
-                Thread.sleep(TimeUnit.SECONDS.toMillis(keepAlive));
+                // 如果收到了ping应答，则在sleep指定时间后，再次ping
+                if (receivedAck.get())
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(keepAlive));
             }
         }
         return null;
@@ -50,16 +59,36 @@ public class PingProcessor extends AsyncTask<String> {
         this.channel = channel;
         this.keepAlive = keepAlive;
         this.cb = callback;
+        refreshLastReceivedAckTime();
         execute();
     }
 
-    public void ping(Channel channel) throws Exception {
+    public void ping() throws Exception {
         MqttMessage msg = ProtocolUtils.pingReqMessage();
         Log.i("[ping]-->发起ping：" + msg);
         channel.writeAndFlush(msg);
     }
 
+    /**
+     * 收到服务器端应答，则调用该方法刷新收到应答的时间
+     */
+    public void refreshLastReceivedAckTime() {
+        this.lastReceivedAckTime = System.nanoTime();
+    }
+
+    /**
+     * 是否应答已过期，长时间未收到服务端消息
+     *
+     * @return 是否应答已过期
+     */
+    private boolean isReceivedAckExpired() {
+        long l = System.nanoTime() - lastReceivedAckTime;
+        long s = TimeUnit.NANOSECONDS.toSeconds(l);
+        return s > keepAlive * 1.5f;
+    }
+
     public void processAck(Channel channel, MqttMessage msg) {
+        refreshLastReceivedAckTime();
         synchronized (receivedAck) {
             receivedAck.set(true);
             receivedAck.notify();
