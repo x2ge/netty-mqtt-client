@@ -114,11 +114,18 @@ public class ProtocolUtils {
     }
 
     public static MqttSubscribeMessage subscribeMessage(int messageId, List<MqttTopicSubscription> mqttTopicSubscriptions) {
-        MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.SUBSCRIBE, false, MqttQoS.AT_LEAST_ONCE,
-                false, 0);
+        MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
+                MqttMessageType.SUBSCRIBE,
+                false,
+                MqttQoS.AT_LEAST_ONCE,
+                false,
+                0);
         MqttMessageIdVariableHeader mqttMessageIdVariableHeader = MqttMessageIdVariableHeader.from(messageId);
         MqttSubscribePayload mqttSubscribePayload = new MqttSubscribePayload(mqttTopicSubscriptions);
-        return new MqttSubscribeMessage(mqttFixedHeader, mqttMessageIdVariableHeader, mqttSubscribePayload);
+        return new MqttSubscribeMessage(
+                mqttFixedHeader,
+                mqttMessageIdVariableHeader,
+                mqttSubscribePayload);
     }
 
     public static MqttSubAckMessage subAckMessage(int messageId, List<Integer> mqttQoSList) {
@@ -129,11 +136,18 @@ public class ProtocolUtils {
     }
 
     public static MqttUnsubscribeMessage unsubscribeMessage(int messageId, List<String> topicList) {
-        MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.UNSUBSCRIBE, false, MqttQoS.AT_MOST_ONCE,
-                false, 0x02);
+        MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
+                MqttMessageType.UNSUBSCRIBE,
+                false,
+                MqttQoS.AT_MOST_ONCE,
+                false,
+                0x02);
         MqttMessageIdVariableHeader variableHeader = MqttMessageIdVariableHeader.from(messageId);
         MqttUnsubscribePayload mqttUnsubscribeMessage = new MqttUnsubscribePayload(topicList);
-        return new MqttUnsubscribeMessage(mqttFixedHeader, variableHeader, mqttUnsubscribeMessage);
+        return new MqttUnsubscribeMessage(
+                mqttFixedHeader,
+                variableHeader,
+                mqttUnsubscribeMessage);
     }
 
     public static MqttUnsubAckMessage unsubAckMessage(int messageId) {
